@@ -360,9 +360,9 @@ function newGame(){
     divisions,
     squad: makeSquad(PLAYER_TIER_START),
     formation:"4-4-2", mentality:"Balanced",
-    bank: 350_000,
-    transferBudget: 50_000_000,
-    wageBudget: Math.max(FIN[PLAYER_TIER_START].wageBudget, 250_000),
+    bank: 1_500_000,
+    transferBudget: 1_500_000,
+    wageBudget: FIN[PLAYER_TIER_START].wageBudget,
     expectationPos: 14, expectationText:"a solid mid-table finish while you find your feet",
     history:[],
     tab:"home",
@@ -372,6 +372,7 @@ function newGame(){
     playoff:null,
     lastSeasonSummary:null,
     cup:null, live:null,
+    stadium:6000, ticketPrice:18, sponsor:"stable",
   };
   startSeasonFixtures();
   generateMarket();
@@ -431,8 +432,8 @@ function xiStrength(players){
 function mentalityEdge(diff, mentality){
   let suited = (diff>=4 && mentality==="Attacking") || (Math.abs(diff)<4 && mentality==="Balanced") || (diff<=-4 && mentality==="Defensive");
   let against = (diff<=-5 && mentality==="Attacking") || (diff>=5 && mentality==="Defensive");
-  if(suited)  return { forMult:1.07, againstMult:0.93 };
-  if(against) return { forMult:0.95, againstMult:1.10 };
+  if(suited)  return { forMult:1.11, againstMult:0.89 };
+  if(against) return { forMult:0.90, againstMult:1.15 };
   return { forMult:1, againstMult:1 };
 }
 function matchupTip(diff, mentality){
@@ -861,16 +862,49 @@ function resolveBracketTo(stopForPlayer){
 }
 
 // ---------- Season conclusion + reshuffle ----------
+// ---------- Club finances / revenue ----------
+function ensureFinance(){ if(G.stadium==null)G.stadium=6000; if(G.ticketPrice==null)G.ticketPrice=18; if(G.sponsor==null)G.sponsor="stable"; }
+function ticketFill(price, posLift){
+  return clamp(0.92 - (price-18)*0.011 + posLift, 0.30, 0.99);
+}
+function matchdayIncome(tierIdx, posFrac){
+  ensureFinance();
+  const games=TIERS[tierIdx].size-1;                  // home games per season
+  const fill=ticketFill(G.ticketPrice, (posFrac-0.5)*0.18);
+  const attendance=Math.round(G.stadium*fill);
+  return { income:Math.round(attendance*G.ticketPrice*games), attendance, fill, games };
+}
+function sponsorIncome(tierIdx, posFrac){
+  ensureFinance();
+  const base=[40_000_000,9_000_000,3_000_000,1_000_000,350_000,120_000][tierIdx];
+  if(G.sponsor==="ambitious") return Math.round(base*(posFrac>=0.5?1.8:0.55));
+  return base;
+}
+function stadiumExpandCost(){ return [2000,1200,800,500,350,250][G.tier]*2000; } // +2,000 seats; £/seat by tier
+function expandStadium(){
+  ensureFinance();
+  const cost=stadiumExpandCost(), add=2000;
+  if(G.bank<cost){ toast("Not enough in the bank for expansion."); return; }
+  G.bank-=cost; G.transferBudget=Math.max(0,G.transferBudget-cost); G.stadium+=add;
+  toast(`Stadium expanded to ${G.stadium.toLocaleString()} seats.`);
+  save(); render();
+}
+function setTicketPrice(p){ ensureFinance(); G.ticketPrice=clamp(p,8,60); save(); render(); }
+function setSponsor(s){ ensureFinance(); G.sponsor=s; save(); render(); }
+
 function finishSeason(order, myPos){
   const tierBefore=G.tier;
   const championOfPL = (tierBefore===0 && myPos===1);
   const relegationRisk = tierBefore!==0 && myPos > (TIERS[tierBefore].size - 2); // bottom 2
 
   // finances for the season just played (uses the tier we played in)
+  const posFrac = 1 - (myPos-1)/Math.max(1,(TIERS[tierBefore].size-1)); // 1=top, 0=bottom
   const wagesAnnual = totalWeeklyWages()*52;
-  const incomeBase = FIN[tierBefore].income;
-  const prizeBonus = Math.round(incomeBase * (1 - (myPos-1)/(TIERS[tierBefore].size*1.5)));
-  const net = prizeBonus - wagesAnnual;
+  const prizeBonus = Math.round(FIN[tierBefore].income * (0.45 + 0.55*posFrac)); // TV / prize money
+  const md = matchdayIncome(tierBefore, posFrac);
+  const spons = sponsorIncome(tierBefore, posFrac);
+  const income = prizeBonus + md.income + spons;
+  const net = income - wagesAnnual;
   G.bank += net;
 
   // board verdict
@@ -884,7 +918,7 @@ function finishSeason(order, myPos){
     pos:myPos, expectation:G.expectationPos, beat, sacked,
     table: order.slice(0,8),
     playoff: G.playoff? JSON.parse(JSON.stringify({results:G.playoff.results, winner:G.playoff.winner})) : null,
-    finance:{ income:prizeBonus, wages:wagesAnnual, net, bank:G.bank },
+    finance:{ income, prize:prizeBonus, matchday:md.income, sponsor:spons, wages:wagesAnnual, net, bank:G.bank, attendance:md.attendance },
   };
 
   if(sacked){
@@ -953,7 +987,7 @@ function reshufflePyramid(playerOrder){
   for(let t=0;t<TIERS.length;t++){
     G.divisions[t].forEach(c=>{
       if(c.isPlayer) return;
-      c.str = clamp(c.str + rint(-2,2), TIERS[t].strMin-4, TIERS[t].strMax+4);
+      c.str = clamp(c.str + rint(-2,3), TIERS[t].strMin-3, TIERS[t].strMax+5); // slight upward drift keeps leagues competitive
     });
   }
 }
@@ -1019,33 +1053,46 @@ function ensureSquadMinimums(){
     }
   });
 }
+function feeForRating(R, real){
+  if(real){ // marquee real players — steep and expensive (~55→£3M, 75→£40M, 85→£110M, 91→£230M)
+    return Math.max(2_000_000, Math.round(1_300_000*Math.pow(1.165,R-55)*(0.92+Math.random()*0.16)/100000)*100000);
+  }
+  // generated depth players — affordable early, scaling up (~42→£40k, 55→£350k, 65→£2M, 75→£12M, 85→£60M)
+  return Math.max(25_000, Math.round(40_000*Math.pow(1.205,R-42)*(0.9+Math.random()*0.2)/5000)*5000);
+}
 function generateMarket(){
   const t=G.tier;
   const owned=new Set(G.squad.map(p=>p.name));
-  const pool=REAL_PLAYERS.filter(rp=>!owned.has(rp.n));
-  // shuffle
-  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=pool[i];pool[i]=pool[j];pool[j]=tmp; }
-  G.market=pool.map(rp=>{
+  G.market=[];
+  // 1) real marquee players (expensive)
+  REAL_PLAYERS.filter(rp=>!owned.has(rp.n)).forEach(rp=>{
     const p={ id:Math.random().toString(36).slice(2,9), name:rp.n, pos:rp.p, rating:rp.r, age:rp.a,
-              goals:0, apps:0, injuredWeeks:0 };
-    p.srcTier=tierForRating(rp.r);
-    p.wage=wageOf(p,t);
-    p.value=valueOf(p,t);
-    // steeper, more expensive fee curve (~55→£1M, ~75→£18M, ~85→£75M, ~91→£180M)
-    const raw=1_000_000 * Math.pow(1.155, p.rating-55) * (0.92+Math.random()*0.16);
-    p.fee=Math.max(1_000_000, Math.round(raw/100000)*100000);
-    return p;
+              goals:0, apps:0, injuredWeeks:0, form:rint(52,72), morale:rint(60,76), condition:100, real:true };
+    p.srcTier=tierForRating(rp.r); p.wage=wageOf(p,t); p.value=valueOf(p,t); p.fee=feeForRating(p.rating,true);
+    G.market.push(p);
   });
+  // 2) generated depth players across all divisions (lots of affordable options for every budget)
+  const weights=[2,3,5,8,11,14]; const tot=weights.reduce((a,b)=>a+b);
+  for(let i=0;i<280;i++){
+    const pos=pick(["GK","DEF","DEF","MID","MID","MID","FWD","FWD"]);
+    let r=Math.random()*tot, st=5; for(let ti=0;ti<6;ti++){ r-=weights[ti]; if(r<=0){st=ti;break;} }
+    const p=freshPlayer(pos, rint(TIERS[st].strMin, TIERS[st].strMax));
+    p.srcTier=tierForRating(p.rating); p.wage=wageOf(p,t); p.value=valueOf(p,t); p.fee=feeForRating(p.rating,false);
+    G.market.push(p);
+  }
+  // shuffle
+  for(let i=G.market.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const tmp=G.market[i];G.market[i]=G.market[j];G.market[j]=tmp; }
 }
 
 // ---------- Transfers ----------
+function resaleValue(p){ return Math.round(feeForRating(p.rating, p.real)*0.62/10000)*10000; }
 function buyPlayer(id){
   const idx=G.market.findIndex(p=>p.id===id);
   if(idx<0) return;
   const p=G.market[idx];
-  if(p.fee>G.transferBudget){ toast("Not enough transfer budget."); return; }
+  if(p.fee>G.transferBudget){ toast("Not enough money — grow the club's finances first."); return; }
   if(totalWeeklyWages()+p.wage>G.wageBudget){ toast("That would break the wage budget."); return; }
-  G.transferBudget-=p.fee;
+  G.transferBudget-=p.fee; G.bank-=p.fee;       // pay from the club's funds
   G.market.splice(idx,1);
   delete p.fee;
   G.squad.push(p);
@@ -1057,8 +1104,8 @@ function sellPlayer(id){
   if(idx<0) return;
   if(G.squad.length<=14){ toast("Squad too small to sell."); return; }
   const p=G.squad[idx];
-  const fee=Math.round(p.value*(0.7+Math.random()*0.5));
-  G.transferBudget+=fee;
+  const fee=resaleValue(p);
+  G.transferBudget+=fee; G.bank+=fee;           // sale proceeds into the bank
   G.squad.splice(idx,1);
   toast(`Sold ${p.name} for ${money(fee)} ✔`);
   save(); render();
@@ -1080,6 +1127,7 @@ function toast(msg){
 // ======================= RENDERING =======================
 function render(){
   if(!G){ renderTitle(); return; }
+  ensureFinance();
   if(G.live && G.live.active){ renderLive(); return; }
   if(G.phase==="playoffs" && G.playoff && G.playoff.playerIn){ renderPlayoffScreen(); return; }
   const app=$("app");
@@ -1228,7 +1276,7 @@ function headerHTML(){
 }
 
 function navHTML(){
-  const tabs=[["home","Home"],["squad","Squad"],["tactics","Tactics"],["transfers","Transfers"],["table","Table"],["fixtures","Fixtures"]];
+  const tabs=[["home","Home"],["squad","Squad"],["tactics","Tactics"],["transfers","Transfers"],["finances","Finances"],["table","Table"],["fixtures","Fixtures"]];
   return `<div class="wrap" style="padding-top:0"><nav class="tabs">`+
     tabs.map(([k,l])=>`<button data-tab="${k}" class="${G.tab===k?'active':''}">${l}</button>`).join("")+
     `</nav></div>`;
@@ -1245,6 +1293,7 @@ function tabHTML(){
     G.tab==="squad"?squadTab():
     G.tab==="tactics"?tacticsTab():
     G.tab==="transfers"?transfersTab():
+    G.tab==="finances"?financesTab():
     G.tab==="table"?tableTab():
     G.tab==="fixtures"?fixturesTab(): ""
   )+`</div>`;
@@ -1382,7 +1431,7 @@ function squadTab(){
     <td class="num">${condCell(p)}</td>
     <td class="num">${p.age}</td>
     <td class="num">${p.goals}</td>
-    <td class="num">${money(p.value)}</td>
+    <td class="num">${money(resaleValue(p))}</td>
     <td class="num">${opts.canStart?`<button class="btn sm" onclick="startFromBench('${p.id}')">Start</button> `:''}<button class="btn alt sm" onclick="sellPlayer('${p.id}')">Sell</button></td>
   </tr>`;
 
@@ -1497,6 +1546,75 @@ function bindTransfers(){
     // keep caret at end when re-focused
     if(typeof s.focus==="function"){ s.focus(); const v=s.value; s.value=""; s.value=v; }
   }
+}
+
+// ---- Finances tab ----
+function financesTab(){
+  ensureFinance();
+  const ord_=standings(G.table,division());
+  const myPos=(ord_.findIndex(o=>o.isPlayer)+1)||G.expectationPos;
+  const posFrac=1-(myPos-1)/Math.max(1,(TIERS[G.tier].size-1));
+  const md=matchdayIncome(G.tier, posFrac);
+  const spons=sponsorIncome(G.tier, posFrac);
+  const prize=Math.round(FIN[G.tier].income*(0.45+0.55*posFrac));
+  const wages=totalWeeklyWages()*52;
+  const income=md.income+spons+prize;
+  const net=income-wages;
+  const expandCost=stadiumExpandCost();
+  const prices=[12,18,25,35,45,60];
+  const priceBtns=prices.map(p=>`<button class="btn ${G.ticketPrice===p?'':'alt'} sm" onclick="setTicketPrice(${p})">£${p}</button>`).join(" ");
+
+  return `
+  <div class="row">
+    <div class="col">
+      <div class="panel">
+        <h2>Club Finances</h2>
+        <div class="kv"><span>Money in the bank</span><span class="vv ${G.bank<0?'bad':'good'}">${money(G.bank)}</span></div>
+        <div class="kv"><span>Available to spend (transfers)</span><span class="vv">${money(G.transferBudget)}</span></div>
+        <div class="kv"><span>Weekly wage bill</span><span class="vv ${totalWeeklyWages()>G.wageBudget?'bad':''}">${money(totalWeeklyWages())} / ${money(G.wageBudget)}</span></div>
+        <h3>Projected season (at ${ord(myPos)})</h3>
+        <div class="kv"><span>Matchday income</span><span class="vv">${money(md.income)}</span></div>
+        <div class="kv"><span>Shirt sponsor</span><span class="vv">${money(spons)}</span></div>
+        <div class="kv"><span>TV / prize money</span><span class="vv">${money(prize)}</span></div>
+        <div class="kv"><span>Total income</span><span class="vv good">${money(income)}</span></div>
+        <div class="kv"><span>Wages (annual)</span><span class="vv bad">−${money(wages)}</span></div>
+        <div class="kv"><span><b>Projected profit</b></span><span class="vv ${net>=0?'good':'bad'}"><b>${money(net)}</b></span></div>
+      </div>
+      <div class="panel">
+        <h2>💡 Ways to make more money</h2>
+        <div class="kv"><span>1. Win matches &amp; finish high</span><span class="muted small">more prize money + bigger gates</span></div>
+        <div class="kv"><span>2. Go on a cup run</span><span class="muted small">prize money each round</span></div>
+        <div class="kv"><span>3. Expand the stadium</span><span class="muted small">permanent matchday boost</span></div>
+        <div class="kv"><span>4. Set the right ticket price</span><span class="muted small">balance price vs attendance</span></div>
+        <div class="kv"><span>5. Develop &amp; sell players</span><span class="muted small">buy young, sell high</span></div>
+        <div class="kv"><span>6. Earn promotion</span><span class="muted small">far bigger TV &amp; sponsor deals</span></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel">
+        <h2>🏟️ Stadium</h2>
+        <div class="kv"><span>Capacity</span><span class="vv">${G.stadium.toLocaleString()}</span></div>
+        <div class="kv"><span>Projected attendance</span><span class="vv">${md.attendance.toLocaleString()} <span class="muted small">(${Math.round(md.fill*100)}% full)</span></span></div>
+        <p class="muted small">Bigger ground = more matchday income every season.</p>
+        <button class="btn ${G.bank>=expandCost?'':'alt'}" ${G.bank>=expandCost?'':'disabled'} onclick="expandStadium()">Expand +2,000 seats — ${money(expandCost)}</button>
+      </div>
+      <div class="panel">
+        <h2>🎟️ Ticket price</h2>
+        <div class="kv"><span>Current price</span><span class="vv">£${G.ticketPrice}</span></div>
+        <div class="kv"><span>Effect on attendance</span><span class="vv">${Math.round(md.fill*100)}% full</span></div>
+        <div class="tac-opt" style="margin-top:8px">${priceBtns}</div>
+        <p class="muted small">Push the price up for more per fan — but charge too much and seats empty out, costing you more than you gain.</p>
+      </div>
+      <div class="panel">
+        <h2>🤝 Shirt sponsor</h2>
+        <div class="tac-opt">
+          <button class="btn ${G.sponsor==='stable'?'':'alt'} sm" onclick="setSponsor('stable')">Stable deal</button>
+          <button class="btn ${G.sponsor==='ambitious'?'gold':'alt'} sm" onclick="setSponsor('ambitious')">Performance deal</button>
+        </div>
+        <p class="muted small">${G.sponsor==='ambitious'?'<b>Performance:</b> a big payout if you finish in the top half — but much less if you finish low. High risk, high reward.':'<b>Stable:</b> a steady guaranteed payment regardless of results. Safe.'}</p>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ---- Table tab ----
@@ -1679,8 +1797,8 @@ function showSeasonReview(s){
 function prepNextSeasonShell(){
   // set up offseason budgets and market WITHOUT advancing fixtures yet; kickoff happens from Home
   G.season++;
-  G.transferBudget = Math.max(50_000_000, FIN[G.tier].transfer + Math.max(0, Math.round(G.bank*0.4)));
-  G.wageBudget = Math.max(FIN[G.tier].wageBudget, 250_000);
+  G.transferBudget = Math.max(0, G.bank);   // you can spend what the club actually has
+  G.wageBudget = FIN[G.tier].wageBudget;
   const justPromoted = G.lastSeasonSummary && G.lastSeasonSummary.promoted;
   if(justPromoted && G.tier>0){
     // newly promoted: board just wants survival/consolidation
@@ -1726,6 +1844,7 @@ function startNextSeason(){
 window.buyPlayer=buyPlayer; window.sellPlayer=sellPlayer;
 window.setLineupSlot=setLineupSlot; window.startFromBench=startFromBench; window.autoPickXI=autoPickXI;
 window.setCaptain=setCaptain; window.setPenTaker=setPenTaker; window.shareGame=shareGame;
+window.expandStadium=expandStadium; window.setTicketPrice=setTicketPrice; window.setSponsor=setSponsor;
 window.startLeagueMatch=startLeagueMatch; window.startCupMatch=startCupMatch;
 window.stepLive=stepLive; window.finalizeLive=finalizeLive; window.setLiveMentality=setLiveMentality; window.liveSub=liveSub;
 
