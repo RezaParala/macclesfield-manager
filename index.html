@@ -420,7 +420,6 @@ function freshPlayer(pos, baseStr){
     name: pick(FIRST)+" "+pick(LAST),
     pos, rating, age,
     wage: 0, // set below
-    value: 0,
     goals:0, apps:0, injuredWeeks:0,
     form: rint(48,68), morale: rint(58,74), condition: 100,
     contract: rint(1,4),
@@ -440,18 +439,11 @@ function ensurePlayerAttrs(p){
   if(p.contract==null) p.contract=rint(1,4);
   return p;
 }
-// per-tier economy anchors: weekly wage / transfer value of a "rating 55" player at that tier
+// per-tier economy anchor: weekly wage of a "rating 55" player at that tier
 const WAGE_BASE  = {0:62000,    1:15000,   2:4200,    3:1250,   4:430,   5:160};
-const VALUE_BASE = {0:11000000, 1:3200000, 2:850000,  3:190000, 4:42000, 5:11000};
 function wageOf(p, tierIdx){
   const w = WAGE_BASE[tierIdx] * Math.pow(p.rating/55, 3.0);
   return Math.max(50, Math.round(w/10)*10);
-}
-function valueOf(p, tierIdx){
-  tierIdx = (tierIdx!==undefined)? tierIdx : (G? G.tier : 5);
-  const ageFactor = p.age<=24?1.25 : p.age<=29?1.0 : p.age<=32?0.6 : 0.35;
-  const v = VALUE_BASE[tierIdx] * Math.pow(p.rating/55, 3.5) * ageFactor;
-  return Math.max(0, Math.round(v/1000)*1000);
 }
 
 function makeSquad(tierIdx){
@@ -462,7 +454,7 @@ function makeSquad(tierIdx){
   plan.forEach(([pos,count])=>{
     for(let i=0;i<count;i++){
       const p=freshPlayer(pos, mid);
-      p.wage=wageOf(p,tierIdx); p.value=valueOf(p,tierIdx);
+      p.wage=wageOf(p,tierIdx);
       squad.push(p);
     }
   });
@@ -700,50 +692,6 @@ function ensureRoles(){
   }
 }
 // run the player's match: appearances, in-match substitutions (injury + tactical), goals & penalties
-function runPlayerMatch(myGoals, side){
-  ensureRoles();
-  const xi=selectedXI();
-  const subsPool=G.squad.filter(p=>!G.lineup.includes(p.id) && p.injuredWeeks<=0).sort((a,b)=>b.rating-a.rating);
-  const onPitch=new Set(xi.map(p=>p.id));
-  const appeared=new Set(xi.map(p=>p.id));
-  const events=[];
-  let injuryEvent=null, subsMade=0; const MAXSUBS=5;
-  const grabSub=(pos)=> subsPool.find(p=>!appeared.has(p.id) && p.pos===pos) || subsPool.find(p=>!appeared.has(p.id));
-
-  // injury during the match -> bring a substitute on
-  if(Math.random()<0.10 && xi.length){
-    const victim=pick(xi);
-    victim.injuredWeeks=rint(1,4);
-    injuryEvent=`🚑 ${victim.name} injured (out ${victim.injuredWeeks} wk${victim.injuredWeeks>1?'s':''})`;
-    onPitch.delete(victim.id);
-    const repl=grabSub(victim.pos);
-    if(repl && subsMade<MAXSUBS){ onPitch.add(repl.id); appeared.add(repl.id); subsMade++;
-      events.push({minute:rint(15,80), text:`🔄 ${repl.name} on for ${victim.name} (injury)`}); }
-  }
-  // up to two tactical substitutions (fresh legs late on)
-  for(let s=0; s<Math.min(2, MAXSUBS-subsMade); s++){
-    if(Math.random()<0.55){
-      const off=[...onPitch].map(id=>G.squad.find(p=>p.id===id)).filter(p=>p&&p.pos!=="GK").sort((a,b)=>a.rating-b.rating)[0];
-      const on=grabSub(off?off.pos:"MID");
-      if(off && on){ onPitch.delete(off.id); onPitch.add(on.id); appeared.add(on.id); subsMade++;
-        events.push({minute:rint(60,85), text:`🔄 ${on.name} on for ${off.name}`}); }
-    }
-  }
-  // appearances for everyone who featured
-  appeared.forEach(id=>{ const p=G.squad.find(x=>x.id===id); if(p) p.apps++; });
-  // goals (penalties go to the designated taker if on the pitch)
-  const onPitchPlayers=[...appeared].map(id=>G.squad.find(p=>p.id===id)).filter(Boolean);
-  const pen=G.squad.find(p=>p.id===G.penTakerId);
-  for(let i=0;i<myGoals;i++){
-    let scorer, isPen=false;
-    if(pen && onPitch.has(pen.id) && Math.random()<0.18){ scorer=pen; isPen=true; }
-    else scorer=weightedScorer(onPitchPlayers);
-    if(scorer) scorer.goals++;
-    events.push({minute:rint(1,90), text:`⚽${isPen?' (pen)':''} ${scorer?scorer.name:'?'} (${side})`});
-  }
-  return {events, injuryEvent};
-}
-
 // ===================== LIVE MATCH ENGINE =====================
 const CUP_TRIGGERS=[3,8,13,19,25,31];           // league matchweeks when an FA Cup round falls
 const CUP_ROUND_NAMES=["1st Round","2nd Round","3rd Round","Quarter-final","Semi-final","Final"];
@@ -1019,10 +967,6 @@ function playPlayoffTie(tie, neutral){
   return { home, away, hg:Math.floor(hg), ag:Math.floor(ag), pens: (hg%1||ag%1)?true:false, winner };
 }
 
-function autoSimPlayoffs(){
-  // resolve everything; used when player not involved
-  resolveBracketTo(null);
-}
 function resolveBracketTo(stopForPlayer){
   let p=G.playoff;
   let advancing;
@@ -1253,23 +1197,6 @@ function moveClub(name, fromTier, toTier){
 }
 
 // ---------- Offseason: budgets, expectations, market ----------
-function startNextSeason(){
-  G.season++;
-  // budgets
-  G.transferBudget = FIN[G.tier].transfer + Math.max(0, Math.round(G.bank*0.4));
-  G.wageBudget = FIN[G.tier].wageBudget;
-  // expectations scale with tier
-  const expByTier={5:11, 4:14, 3:14, 2:14, 1:10, 0:17};
-  G.expectationPos = expByTier[G.tier];
-  G.expectationText = expectationPhrase(G.tier, G.expectationPos);
-  // age players, develop youngsters, retire old
-  ageSquad();
-  generateMarket();
-  startSeasonFixtures();
-  G.playoff=null; G.lastSeasonSummary=null;
-  G.tab="home";
-  save(); render();
-}
 function expectationPhrase(tier,pos){
   if(tier===0) return "to avoid relegation and establish the club in the Premier League";
   if(tier===5) return "a push for the play-offs";
@@ -1291,7 +1218,7 @@ function ageSquad(){
     else if(p.age<=32) p.rating=clamp(p.rating+rint(-1,1),35,99);
     else p.rating=clamp(p.rating+rint(-2,0),35,99);
     p.injuredWeeks=0; p.goals=0; p.apps=0;
-    p.value=valueOf(p); p.wage=wageOf(p,G.tier);
+    p.wage=wageOf(p,G.tier);
     keep.push(p);
   });
   G.squad=keep;
@@ -1304,7 +1231,7 @@ function ensureSquadMinimums(){
     let have=G.squad.filter(p=>p.pos===pos).length;
     while(have<m){
       const p=freshPlayer(pos, TIERS[G.tier].strMin-2);
-      p.wage=wageOf(p,G.tier); p.value=valueOf(p);
+      p.wage=wageOf(p,G.tier);
       G.squad.push(p); have++;
     }
   });
@@ -1327,7 +1254,7 @@ function generateMarket(){
   REAL_PLAYERS.filter(rp=>!owned.has(rp.n)).forEach(rp=>{
     const p={ id:Math.random().toString(36).slice(2,9), name:rp.n, pos:rp.p, rating:rp.r, age:rp.a,
               goals:0, apps:0, injuredWeeks:0, form:rint(52,72), morale:rint(60,76), condition:100, real:true, lg:rp.lg };
-    p.srcTier=tierForRating(rp.r); p.wage=wageOf(p,t); p.value=valueOf(p,t); p.fee=feeForRating(p.rating,true);
+    p.srcTier=tierForRating(rp.r); p.wage=wageOf(p,t); p.fee=feeForRating(p.rating,true);
     G.market.push(p);
   });
   // 2) generated depth players across all divisions (lots of affordable options for every budget)
@@ -1336,7 +1263,7 @@ function generateMarket(){
     const pos=pick(["GK","DEF","DEF","MID","MID","MID","FWD","FWD"]);
     let r=Math.random()*tot, st=5; for(let ti=0;ti<6;ti++){ r-=weights[ti]; if(r<=0){st=ti;break;} }
     const p=freshPlayer(pos, rint(TIERS[st].strMin, TIERS[st].strMax));
-    p.srcTier=tierForRating(p.rating); p.lg=TIERS[p.srcTier].name; p.wage=wageOf(p,t); p.value=valueOf(p,t); p.fee=feeForRating(p.rating,false);
+    p.srcTier=tierForRating(p.rating); p.lg=TIERS[p.srcTier].name; p.wage=wageOf(p,t); p.fee=feeForRating(p.rating,false);
     G.market.push(p);
   }
   // shuffle
@@ -2002,24 +1929,6 @@ function fixturesTab(){
 }
 
 // ======================= MODALS =======================
-function showMatchModal(m){
-  const root=$("modal-root");
-  if(!m){ root.innerHTML=""; render(); return; }
-  const my=m.meHome?m.hg:m.ag, opp=m.meHome?m.ag:m.hg;
-  const res=my>opp?"WIN":my<opp?"LOSS":"DRAW";
-  const resCls=my>opp?"good":my<opp?"bad":"warn";
-  const evs=m.events.slice().sort((a,b)=>a.minute-b.minute)
-    .map(e=>`<div>${e.minute}' ${e.text}</div>`).join("") || `<div class="muted">No goals.</div>`;
-  root.innerHTML=`<div class="overlay"><div class="modal">
-    <h2 class="center ${resCls}">${res}</h2>
-    <div class="center muted small">${m.home} vs ${m.away}</div>
-    <div class="scoreline">${m.hg} – ${m.ag}</div>
-    <div class="events">${evs}${m.injuryEvent?`<div class="bad">${m.injuryEvent}</div>`:""}</div>
-    <div class="center"><button class="btn" id="m-ok">Continue</button></div>
-  </div></div>`;
-  $("m-ok").onclick=()=>{ root.innerHTML=""; render(); };
-}
-
 function renderPlayoffScreen(){
   const p=G.playoff;
   // Determine current state: have we resolved up to player's involvement?
