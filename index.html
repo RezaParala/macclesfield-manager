@@ -1053,12 +1053,15 @@ function ensureSquadMinimums(){
     }
   });
 }
+const MAX_FEE=175_000_000;
 function feeForRating(R, real){
-  if(real){ // marquee real players — steep and expensive (~55→£3M, 75→£40M, 85→£110M, 91→£230M)
-    return Math.max(2_000_000, Math.round(1_300_000*Math.pow(1.165,R-55)*(0.92+Math.random()*0.16)/100000)*100000);
+  let fee;
+  if(real){ // marquee real players — expensive (~55→£3M, 75→£19M, 85→£72M, 91→£170M)
+    fee = Math.max(2_000_000, Math.round(1_300_000*Math.pow(1.143,R-55)*(0.92+Math.random()*0.16)/100000)*100000);
+  } else { // generated depth players — affordable early, scaling up
+    fee = Math.max(25_000, Math.round(40_000*Math.pow(1.185,R-42)*(0.9+Math.random()*0.2)/5000)*5000);
   }
-  // generated depth players — affordable early, scaling up (~42→£40k, 55→£350k, 65→£2M, 75→£12M, 85→£60M)
-  return Math.max(25_000, Math.round(40_000*Math.pow(1.205,R-42)*(0.9+Math.random()*0.2)/5000)*5000);
+  return Math.min(MAX_FEE, fee); // hard cap: nobody costs more than £175M
 }
 function generateMarket(){
   const t=G.tier;
