@@ -423,6 +423,7 @@ function freshPlayer(pos, baseStr){
     value: 0,
     goals:0, apps:0, injuredWeeks:0,
     form: rint(48,68), morale: rint(58,74), condition: 100,
+    contract: rint(1,4),
   };
 }
 // effective match rating including form, morale and match fitness (condition)
@@ -436,6 +437,7 @@ function ensurePlayerAttrs(p){
   if(p.form==null) p.form=rint(48,68);
   if(p.morale==null) p.morale=rint(58,74);
   if(p.condition==null) p.condition=100;
+  if(p.contract==null) p.contract=rint(1,4);
   return p;
 }
 // per-tier economy anchors: weekly wage / transfer value of a "rating 55" player at that tier
@@ -525,6 +527,7 @@ function newGame(){
     lastSeasonSummary:null,
     cup:null, live:null,
     stadium:6000, ticketPrice:18, sponsor:"stable",
+    news:[], achievements:[],
   };
   startSeasonFixtures();
   generateMarket();
@@ -763,7 +766,7 @@ function setupLive(ctx){
   const bench=G.squad.filter(p=>!G.lineup.includes(p.id) && p.injuredWeeks<=0)
     .sort((a,b)=>b.rating-a.rating).map(p=>p.id);
   G.live=Object.assign({
-    mentality:G.mentality, minute:0, my:0, opp:0, events:[],
+    mentality:G.mentality, minute:0, my:0, opp:0, events:[], momentum:0,
     onPitch:xi.map(p=>p.id), bench, appeared:xi.map(p=>p.id), subsMade:0,
     finished:false, active:true, pens:null,
   }, ctx);
@@ -815,17 +818,37 @@ function liveInjury(min){
   if(repl && L.subsMade<5){ L.onPitch.push(repl.id); L.appeared.push(repl.id); L.subsMade++;
     L.events.push({m:min,t:`🔄 ${repl.name} on for ${victim.name}`,me:true}); }
 }
+const CHANCE_MY=["forces a fine save","drags it just wide","rattles the post!","heads narrowly over","is denied by the keeper","sees a shot blocked","curls it inches past the upright"];
+const CHANCE_OPP=["go close — your keeper saves!","fire just wide","strike the crossbar","head over the bar","are flagged offside","see their shot blocked"];
+function myFieldPlayer(){ const onP=G.live.onPitch.map(id=>G.squad.find(p=>p.id===id)).filter(p=>p&&p.pos!=="GK"); return onP.length?weightedScorer(onP):null; }
 function stepLive(target){
   const L=G.live; if(L.finished) return;
-  let [pMy,pOp]=liveLambdas(); pMy/=90; pOp/=90;
+  if(L.momentum==null) L.momentum=0;
   while(L.minute<target && L.minute<90){
     L.minute++;
-    if(Math.random()<pMy){ L.my++; L.events.push({m:L.minute,t:`⚽ ${liveScorer()} ${L.minute}'`,me:true}); [pMy,pOp]=liveLambdas(); pMy/=90;pOp/=90; }
-    if(Math.random()<pOp){ L.opp++; L.events.push({m:L.minute,t:`⚽ ${L.oppName} ${L.minute}'`,me:false}); }
+    L.momentum*=0.90; // decays back toward neutral
+    let [pMy,pOp]=liveLambdas();
+    const mo=clamp(L.momentum/300,-0.22,0.22);
+    pMy=pMy/90*(1+mo); pOp=pOp/90*(1-mo);
+    if(Math.random()<pMy){ L.my++; L.momentum=Math.min(100,L.momentum+40);
+      L.events.push({m:L.minute,t:`⚽ ${liveScorer()} ${L.minute}'`,me:true}); }
+    else if(Math.random()<pMy*3.2){ const p=myFieldPlayer(); if(p){ L.momentum=Math.min(100,L.momentum+8);
+      L.events.push({m:L.minute,t:`${L.minute}' ${p.name} ${pick(CHANCE_MY)}`,me:true,chance:true}); } }
+    if(Math.random()<pOp){ L.opp++; L.momentum=Math.max(-100,L.momentum-40);
+      L.events.push({m:L.minute,t:`⚽ ${L.oppName} ${L.minute}'`,me:false}); }
+    else if(Math.random()<pOp*3.2){ L.momentum=Math.max(-100,L.momentum-8);
+      L.events.push({m:L.minute,t:`${L.minute}' ${L.oppName} ${pick(CHANCE_OPP)}`,me:false,chance:true}); }
+    if(Math.random()<0.006){ const p=myFieldPlayer(); if(p) L.events.push({m:L.minute,t:`📒 ${L.minute}' Booking for ${p.name}`,me:true,chance:true}); }
     if(Math.random()<0.0013) liveInjury(L.minute);
   }
   if(L.minute>=90){ L.finished=true; if(L.type==="cup" && L.my===L.opp) cupShootout(); }
   save(); renderLive();
+}
+function livePossession(){
+  const L=G.live;
+  const onP=L.onPitch.map(id=>G.squad.find(p=>p.id===id)).filter(Boolean);
+  const diff=xiStrength(onP)-L.oppStr;
+  return clamp(Math.round(50 + diff*0.8 + (L.momentum||0)*0.08), 25, 75);
 }
 function cupShootout(){
   const L=G.live;
@@ -879,6 +902,7 @@ function finalizeLive(){
   const myWin = L.pens? L.pens.me>L.pens.op : L.my>L.opp;
   const draw = !L.pens && L.my===L.opp;
   applyMatchEffects(L, myWin, draw);
+  if(myWin) unlock("firstwin");
 
   if(L.type==="league"){
     recordTable(L.homeName, L.awayName, L.meHome?L.my:L.opp, L.meHome?L.opp:L.my);
@@ -886,6 +910,14 @@ function finalizeLive(){
     G.results.push({home:L.homeName,away:L.awayName,hg:L.meHome?L.my:L.opp,ag:L.meHome?L.opp:L.my,meHome:L.meHome,
       events:L.events.map(e=>({minute:e.m,text:e.t})), injuryEvent:null, oppStr:L.oppStr});
     G.squad.forEach(p=>{ if(p.injuredWeeks>0) p.injuredWeeks--; }); // weekly injury tick
+    // win streak + notable-result news
+    G.streak = myWin? (G.streak||0)+1 : 0;
+    if(G.streak===5){ unlock("streak5"); pushNews(`🔥 Five league wins in a row!`,"good"); }
+    else if(G.streak>=3) pushNews(`🔥 ${G.streak} league wins on the bounce.`,"good");
+    const margin=Math.abs(L.my-L.opp);
+    if(myWin && margin>=4) pushNews(`💥 Emphatic ${L.my}–${L.opp} win over ${L.oppName}!`,"good");
+    else if(!myWin && !draw && margin>=4) pushNews(`😞 Heavy ${L.my}–${L.opp} defeat to ${L.oppName}.`,"bad");
+    else if(myWin && L.oppStr - xiStrength(L.appeared.map(id=>G.squad.find(p=>p.id===id)).filter(Boolean)) >= 6) pushNews(`👏 Battling ${L.my}–${L.opp} win over stronger ${L.oppName}.`,"good");
     G.mw++;
     G.live=null; save();
     showMatchResult(L,"league",null);
@@ -893,10 +925,11 @@ function finalizeLive(){
     let cupMsg;
     if(myWin){
       const prize=cupPrize(G.cup.round+1); G.bank+=prize; G.cup.round++;
-      if(G.cup.round>=CUP_TRIGGERS.length){ G.cup.won=true; cupMsg=`🏆 You've WON the FA Cup! (+${money(prize)})`; }
-      else cupMsg=`Through to the ${CUP_ROUND_NAMES[G.cup.round]}! (+${money(prize)} prize)`;
+      if(G.cup.round>=CUP_TRIGGERS.length){ G.cup.won=true; cupMsg=`🏆 You've WON the FA Cup! (+${money(prize)})`; unlock("facup"); pushNews(`🏆 Macclesfield have WON THE FA CUP!`,"good"); }
+      else { cupMsg=`Through to the ${CUP_ROUND_NAMES[G.cup.round]}! (+${money(prize)} prize)`; pushNews(`🏆 FA Cup: beat ${L.oppName} ${L.my}–${L.opp}, into the ${CUP_ROUND_NAMES[G.cup.round]}.`,"good"); }
     } else {
       G.cup.alive=false; cupMsg="Knocked out of the FA Cup.";
+      pushNews(`🏆 FA Cup exit — lost ${L.my}–${L.opp} to ${L.oppName}.`,"bad");
     }
     G.cup.lastResult={opp:L.oppName, my:L.my, op:L.opp, pens:L.pens, msg:cupMsg};
     G.live=null; save();
@@ -1044,6 +1077,66 @@ function expandStadium(){
 function setTicketPrice(p){ ensureFinance(); G.ticketPrice=clamp(p,8,60); save(); render(); }
 function setSponsor(s){ ensureFinance(); G.sponsor=s; save(); render(); }
 
+// ---------- News & achievements ----------
+function pushNews(text, type){
+  if(!G.news) G.news=[];
+  G.news.unshift({season:G.season, text, type:type||"info"});
+  if(G.news.length>60) G.news.length=60;
+}
+const ACHIEVEMENTS=[
+  {id:"firstwin", name:"Off the mark", desc:"Win your first match"},
+  {id:"streak5", name:"On a roll", desc:"Win 5 league games in a row"},
+  {id:"bigsign", name:"Statement signing", desc:"Sign a player rated 85+"},
+  {id:"galactico", name:"Galáctico", desc:"Sign a player rated 90+"},
+  {id:"facup", name:"Cup glory", desc:"Win the FA Cup"},
+  {id:"promo", name:"Going up!", desc:"Win promotion"},
+  {id:"reach4", name:"Into the National League", desc:"Reach the National League"},
+  {id:"reach3", name:"Into the EFL", desc:"Reach League Two"},
+  {id:"reach2", name:"Third tier", desc:"Reach League One"},
+  {id:"reach1", name:"Championship club", desc:"Reach the Championship"},
+  {id:"reach0", name:"THE PROMISED LAND", desc:"Reach the Premier League"},
+  {id:"pltitle", name:"Champions of England", desc:"Win the Premier League"},
+  {id:"rich", name:"Cash rich", desc:"Hold over £50M in the bank"},
+  {id:"legend", name:"Club legend", desc:"Manage for 10 seasons"},
+];
+function unlock(id){
+  if(!G.achievements) G.achievements=[];
+  if(G.achievements.includes(id)) return;
+  G.achievements.push(id);
+  const a=ACHIEVEMENTS.find(x=>x.id===id);
+  if(a) pushNews(`🏅 Achievement: ${a.name} — ${a.desc}`, "ach");
+}
+function checkReachTier(){ const map={4:"reach4",3:"reach3",2:"reach2",1:"reach1",0:"reach0"}; if(map[G.tier]) unlock(map[G.tier]); }
+
+// ---------- Contracts & loans ----------
+function renewContract(id){
+  const p=G.squad.find(x=>x.id===id); if(!p || p.loan) return;
+  p.contract = Math.min(5, (p.contract||1) + rint(2,3));
+  toast(`${p.name} signs a new contract (${p.contract} yrs).`);
+  pushNews(`✍️ ${p.name} has signed a new ${p.contract}-year contract.`, "info");
+  save(); render();
+}
+function loanFeeFor(p){ return Math.max(25_000, Math.round((p.fee||1_000_000)*0.12/5000)*5000); }
+function loanPlayer(id){
+  const idx=G.market.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=G.market[idx];
+  const fee=loanFeeFor(p);
+  if(fee>G.transferBudget){ toast("Not enough money for the loan fee."); return; }
+  if(totalWeeklyWages()+p.wage>G.wageBudget){ toast("That would break the wage budget."); return; }
+  G.transferBudget-=fee; G.bank-=fee;
+  G.market.splice(idx,1);
+  p.loan=true; p.loanSeason=G.season; delete p.fee;
+  G.squad.push(p);
+  toast(`Loaned ${p.name} (${p.rating}) for the season ✔`);
+  pushNews(`🔁 ${p.name} (${p.rating}) joins on loan for the season.`, "transfer");
+  save(); render();
+}
+function returnLoanPlayers(){
+  const loans=G.squad.filter(p=>p.loan);
+  loans.forEach(p=>pushNews(`↩️ ${p.name} returns to their parent club after a loan spell.`, "transfer"));
+  G.squad=G.squad.filter(p=>!p.loan);
+}
+
 function finishSeason(order, myPos){
   const tierBefore=G.tier;
   const championOfPL = (tierBefore===0 && myPos===1);
@@ -1073,9 +1166,11 @@ function finishSeason(order, myPos){
     finance:{ income, prize:prizeBonus, matchday:md.income, sponsor:spons, wages:wagesAnnual, net, bank:G.bank, attendance:md.attendance },
   };
 
+  const cupResult = G.cup ? (G.cup.won?"won":(G.cup.alive?null:"out")) : null;
+
   if(sacked){
     summary.promoted=false; summary.champion=false;
-    G.history.push({season:G.season, tier:TIERS[tierBefore].name, pos:myPos, promoted:false, champion:championOfPL});
+    G.history.push({season:G.season, tier:TIERS[tierBefore].name, pos:myPos, promoted:false, champion:championOfPL, cup:cupResult, cupRound:G.cup?G.cup.round:0});
     G.lastSeasonSummary=summary; G.phase="offseason"; save();
     showSackedScreen(summary); return;
   }
@@ -1089,7 +1184,13 @@ function finishSeason(order, myPos){
   summary.champion=championOfPL;
   summary.relegated = G.tier > tierBefore;
   summary.newTierName = TIERS[G.tier].name;
-  G.history.push({season:G.season, tier:TIERS[tierBefore].name, pos:myPos, promoted:promotedNow, champion:championOfPL});
+  G.history.push({season:G.season, tier:TIERS[tierBefore].name, pos:myPos, promoted:promotedNow, champion:championOfPL, cup:cupResult, cupRound:G.cup?G.cup.round:0});
+
+  // news + achievements
+  if(championOfPL){ unlock("pltitle"); pushNews(`🏆 CHAMPIONS OF ENGLAND! Macclesfield win the Premier League!`,"good"); }
+  if(promotedNow){ unlock("promo"); pushNews(`⬆️ PROMOTED from ${TIERS[tierBefore].name} to ${TIERS[G.tier].name}!`,"good"); checkReachTier(); }
+  else if(summary.relegated) pushNews(`⬇️ Relegated from ${TIERS[tierBefore].name}.`,"bad");
+  else pushNews(`Season over — finished ${ord(myPos)} in ${TIERS[tierBefore].name}.${beat?" Board target met.":""}`, beat?"good":"info");
 
   G.lastSeasonSummary=summary;
   G.phase="offseason";
@@ -1179,8 +1280,11 @@ function expectationPhrase(tier,pos){
 function ageSquad(){
   const keep=[];
   G.squad.forEach(p=>{
+    ensurePlayerAttrs(p);
     p.age++;
-    if(p.age>=39 || (p.age>=36 && Math.random()<0.5)){ return; } // retire
+    if(p.age>=39 || (p.age>=36 && Math.random()<0.5)){ pushNews(`👋 ${p.name} has retired.`, "info"); return; } // retire
+    p.contract--;
+    if(p.contract<=0){ pushNews(`📄 ${p.name} (${p.rating}) left on a free transfer — his contract expired.`, "transfer"); return; }
     // development / decline (gentler, so bought quality persists)
     if(p.age<=23) p.rating=clamp(p.rating+rint(0,3),35,99);
     else if(p.age<=29) p.rating=clamp(p.rating+rint(0,2),35,99);
@@ -1247,22 +1351,28 @@ function buyPlayer(id){
   const p=G.market[idx];
   if(p.fee>G.transferBudget){ toast("Not enough money — grow the club's finances first."); return; }
   if(totalWeeklyWages()+p.wage>G.wageBudget){ toast("That would break the wage budget."); return; }
+  const paid=p.fee;
   G.transferBudget-=p.fee; G.bank-=p.fee;       // pay from the club's funds
   G.market.splice(idx,1);
   delete p.fee;
+  p.contract=rint(3,5);                          // signings agree a fresh deal
   G.squad.push(p);
   toast(`Signed ${p.name} (${p.rating}) ✔`);
+  pushNews(`✍️ Signed ${p.name} (${p.rating}, ${leagueShort(p.lg||"")}) for ${money(paid)}.`, "transfer");
+  if(p.rating>=90) unlock("galactico"); else if(p.rating>=85) unlock("bigsign");
   save(); render();
 }
 function sellPlayer(id){
   const idx=G.squad.findIndex(p=>p.id===id);
   if(idx<0) return;
-  if(G.squad.length<=14){ toast("Squad too small to sell."); return; }
   const p=G.squad[idx];
+  if(p.loan){ toast("You can't sell a loan player."); return; }
+  if(G.squad.length<=14){ toast("Squad too small to sell."); return; }
   const fee=resaleValue(p);
   G.transferBudget+=fee; G.bank+=fee;           // sale proceeds into the bank
   G.squad.splice(idx,1);
   toast(`Sold ${p.name} for ${money(fee)} ✔`);
+  pushNews(`💸 Sold ${p.name} (${p.rating}) for ${money(fee)}.`, "transfer");
   save(); render();
 }
 
@@ -1302,7 +1412,7 @@ function renderLive(){
   const homeG=L.meHome? L.my : L.opp, awayG=L.meHome? L.opp : L.my;
   const title=L.type==="cup"? `FA Cup · ${CUP_ROUND_NAMES[L.round]}` : `${TIERS[G.tier].short} · Matchweek ${G.mw+1}`;
 
-  const feed=L.events.slice().sort((a,b)=>a.m-b.m).map(e=>`<div class="${e.me?'':'muted'}">${e.t}</div>`).join("")
+  const feed=L.events.slice().sort((a,b)=>b.m-a.m).map(e=>`<div class="${e.chance?'muted small':(e.me?'good':'bad')}" style="padding:2px 0">${e.t}</div>`).join("")
     || `<div class="muted">Kick-off! Press play to get the match under way.</div>`;
 
   const mentBtns=Object.keys(MENTALITIES).map(m=>`<button class="${L.mentality===m?'sel':''}" onclick="setLiveMentality('${m}')">${m}</button>`).join("");
@@ -1341,6 +1451,7 @@ function renderLive(){
       <div style="font-size:22px;font-weight:800;margin:6px 0">${homeName} <span style="color:var(--gold)">${homeG} – ${awayG}</span> ${awayName}</div>
       <div class="muted small">${L.meHome?"Home":"Away"} · ${L.mentality} · vs strength ${Math.round(L.oppStr)}</div>
       <div class="bar" style="max-width:320px;margin:8px auto 0"><span style="width:${Math.round(L.minute/90*100)}%"></span></div>
+      <div class="muted small" style="margin-top:8px">Possession ${livePossession()}% · ${L.momentum>15?"You're on top 🔼":L.momentum<-15?"Under pressure 🔽":"End to end"}</div>
     </div>
     <div class="row">
       <div class="col"><div class="panel"><h2>Match feed</h2><div class="events" style="max-height:280px;overflow:auto">${feed}</div></div></div>
@@ -1431,7 +1542,7 @@ function headerHTML(){
 }
 
 function navHTML(){
-  const tabs=[["home","Home"],["squad","Squad"],["tactics","Tactics"],["transfers","Transfers"],["finances","Finances"],["table","Table"],["fixtures","Fixtures"]];
+  const tabs=[["home","Home"],["squad","Squad"],["tactics","Tactics"],["transfers","Transfers"],["finances","Finances"],["table","Table"],["fixtures","Fixtures"],["history","History"]];
   return `<div class="wrap" style="padding-top:0"><nav class="tabs">`+
     tabs.map(([k,l])=>`<button data-tab="${k}" class="${G.tab===k?'active':''}">${l}</button>`).join("")+
     `</nav></div>`;
@@ -1450,7 +1561,8 @@ function tabHTML(){
     G.tab==="transfers"?transfersTab():
     G.tab==="finances"?financesTab():
     G.tab==="table"?tableTab():
-    G.tab==="fixtures"?fixturesTab(): ""
+    G.tab==="fixtures"?fixturesTab():
+    G.tab==="history"?historyTab(): ""
   )+`</div>`;
 }
 
@@ -1509,6 +1621,8 @@ function homeTab(){
     return `<div class="kv"><span><span class="formchip fc-${res}">${res}</span> ${r.meHome?"vs":"@"} ${oppName}</span><span class="vv">${my}-${opp}</span></div>`;
   }).join("") || `<div class="muted small">No matches played yet.</div>`;
 
+  const newsItems=(G.news||[]).slice(0,6).map(n=>`<div class="kv"><span class="${n.type==='good'?'good':n.type==='bad'?'bad':n.type==='ach'?'warn':''}">${n.text}</span></div>`).join("") || `<div class="muted small">No news yet — get the season under way.</div>`;
+
   return `
   <div class="row">
     <div class="col">
@@ -1519,6 +1633,7 @@ function homeTab(){
         <div class="kv"><span>Current league position</span><span class="vv ${onTrack?'good':'bad'}">${G.table[pc.name].P?ord(myPos):"—"}</span></div>
         <div class="kv"><span>Verdict so far</span><span class="vv ${onTrack?'good':'warn'}">${onTrack?"On track 👍":"Falling short ⚠"}</span></div>
       </div>
+      <div class="panel"><div class="flex-between"><h2>📰 Latest news</h2><button class="btn alt sm" onclick="gotoTab('history')">All news →</button></div>${newsItems}</div>
     </div>
     <div class="col">
       <div class="panel"><h2>Form</h2>${recent}</div>
@@ -1578,17 +1693,21 @@ function squadTab(){
   const injured=G.squad.filter(p=>p.injuredWeeks>0)
     .sort((a,b)=> order[a.pos]-order[b.pos] || b.rating-a.rating);
 
-  const playerRow=(p,opts)=>`<tr>
+  const contractCell=p=> p.loan? `<span class="warn">loan</span>` : `<span class="${(p.contract||9)<=1?'bad':(p.contract<=2?'warn':'')}">${p.contract||'?'}y</span>`;
+  const playerRow=(p,opts)=>{
+    const actions = p.loan? `<span class="muted small">on loan</span>`
+      : `${opts.canStart?`<button class="btn sm" onclick="startFromBench('${p.id}')">Start</button> `:''}${(p.contract||9)<=2?`<button class="btn gold sm" onclick="renewContract('${p.id}')">Renew</button> `:''}<button class="btn alt sm" onclick="sellPlayer('${p.id}')">Sell</button>`;
+    return `<tr>
     <td><span class="pill pos-${p.pos}">${p.pos}</span></td>
-    <td>${p.name}${p.injuredWeeks>0?` <span class="injured">🚑 ${p.injuredWeeks}w</span>`:''}</td>
+    <td>${p.name}${p.loan?' <span class="pill" style="background:var(--blue);color:#fff">LOAN</span>':''}${p.injuredWeeks>0?` <span class="injured">🚑 ${p.injuredWeeks}w</span>`:''}</td>
     <td class="num"><b>${p.rating}</b></td>
     <td class="num">${formCell(p)}</td>
     <td class="num">${condCell(p)}</td>
     <td class="num">${p.age}</td>
-    <td class="num">${p.goals}</td>
+    <td class="num">${contractCell(p)}</td>
     <td class="num">${money(resaleValue(p))}</td>
-    <td class="num">${opts.canStart?`<button class="btn sm" onclick="startFromBench('${p.id}')">Start</button> `:''}<button class="btn alt sm" onclick="sellPlayer('${p.id}')">Sell</button></td>
-  </tr>`;
+    <td class="num" style="white-space:nowrap">${actions}</td>
+  </tr>`;};
 
   const subsRows=subs.length? subs.map(p=>playerRow(p,{canStart:true})).join("")
     : `<tr><td colspan="9" class="muted center">No fit substitutes.</td></tr>`;
@@ -1596,9 +1715,17 @@ function squadTab(){
     : `<tr><td colspan="9" class="muted center">No injuries — everyone's fit. 💪</td></tr>`;
 
   const xiRating=squadStrength(G.formation,G.mentality).toFixed(1);
-  const subHead=`<thead><tr><th>Pos</th><th>Name</th><th class="num">OVR</th><th class="num">Form</th><th class="num">Fit</th><th class="num">Age</th><th class="num">Gls</th><th class="num">Value</th><th></th></tr></thead>`;
+  const subHead=`<thead><tr><th>Pos</th><th>Name</th><th class="num">OVR</th><th class="num">Form</th><th class="num">Fit</th><th class="num">Age</th><th class="num">Deal</th><th class="num">Value</th><th></th></tr></thead>`;
+
+  const expiring=G.squad.filter(p=>!p.loan && (p.contract||9)<=1);
+  const expiringPanel = expiring.length? `<div class="panel" style="border-color:var(--gold)">
+    <h2>⚠️ Contracts expiring</h2>
+    <p class="muted small">These players will leave on a free transfer at the end of the season unless you renew.</p>
+    ${expiring.map(p=>`<div class="kv"><span><span class="pill pos-${p.pos}">${p.pos}</span> ${p.name} (${p.rating})</span><button class="btn gold sm" onclick="renewContract('${p.id}')">Renew deal</button></div>`).join("")}
+  </div>`:"";
 
   return `
+  ${expiringPanel}
   <div class="panel">
     <div class="flex-between">
       <h2>Starting XI <span class="muted small">— ${G.formation} · avg ${xiRating}</span></h2>
@@ -1660,7 +1787,10 @@ function marketRows(){
   }
   const total=list.length, CAP=120;
   const rows=list.slice(0,CAP).map(p=>{
-    const canAfford=p.fee<=G.transferBudget && (totalWeeklyWages()+p.wage)<=G.wageBudget;
+    const wageOk=(totalWeeklyWages()+p.wage)<=G.wageBudget;
+    const canBuy=p.fee<=G.transferBudget && wageOk;
+    const loanFee=loanFeeFor(p);
+    const canLoan=loanFee<=G.transferBudget && wageOk;
     const lvl = p.lg? leagueShort(p.lg) : (p.srcTier!==undefined? TIERS[p.srcTier].short : "—");
     return `<tr>
       <td><span class="pill pos-${p.pos}">${p.pos}</span></td>
@@ -1670,7 +1800,10 @@ function marketRows(){
       <td class="num">${p.age}</td>
       <td class="num">${money(p.wage)}/w</td>
       <td class="num">${money(p.fee)}</td>
-      <td class="num"><button class="btn sm ${canAfford?'':'alt'}" ${canAfford?'':'disabled'} onclick="buyPlayer('${p.id}')">Sign</button></td>
+      <td class="num" style="white-space:nowrap">
+        <button class="btn sm ${canBuy?'':'alt'}" ${canBuy?'':'disabled'} onclick="buyPlayer('${p.id}')">Sign</button>
+        <button class="btn alt sm" title="Loan for the season (${money(loanFee)})" ${canLoan?'':'disabled'} onclick="loanPlayer('${p.id}')">Loan</button>
+      </td>
     </tr>`;
   }).join("");
   const note = total>CAP
@@ -1770,6 +1903,46 @@ function financesTab(){
       </div>
     </div>
   </div>`;
+}
+
+// ---- History / honours tab ----
+function historyTab(){
+  const h=G.history||[];
+  const titles=h.filter(x=>x.champion).length;
+  const promotions=h.filter(x=>x.promoted).length;
+  const cups=h.filter(x=>x.cup==="won").length;
+  const best=h.reduce((b,x)=>{ const ti=TIERS.findIndex(t=>t.name===x.tier); return ti<b.ti? {ti, name:x.tier}:b; }, {ti:99,name:"—"});
+  const honours=`
+    <div class="row">
+      <div class="stat"><div class="k">Seasons</div><div class="v">${G.season}</div></div>
+      <div class="stat"><div class="k">Promotions</div><div class="v">${promotions}</div></div>
+      <div class="stat"><div class="k">FA Cups</div><div class="v">${cups}</div></div>
+      <div class="stat"><div class="k">League titles</div><div class="v">${titles}</div></div>
+      <div class="stat"><div class="k">Highest level</div><div class="v" style="font-size:13px">${best.name}</div></div>
+    </div>`;
+
+  const timeline = h.length? h.slice().reverse().map(x=>{
+    let tag="", cls="";
+    if(x.champion){ tag="🏆 Champions"; cls="good"; }
+    else if(x.promoted){ tag="⬆️ Promoted"; cls="good"; }
+    const cupTag = x.cup==="won"?" · 🏆 FA Cup":"";
+    return `<div class="kv"><span>S${x.season} · ${x.tier}</span><span class="vv ${cls}">${ord(x.pos)}${tag?" · "+tag:""}${cupTag}</span></div>`;
+  }).join("") : `<div class="muted small">No completed seasons yet.</div>`;
+
+  const got=new Set(G.achievements||[]);
+  const ach=ACHIEVEMENTS.map(a=>`<div class="kv"><span>${got.has(a.id)?"🏅":"🔒"} <b>${a.name}</b> <span class="muted small">— ${a.desc}</span></span><span class="vv ${got.has(a.id)?'good':'muted'}">${got.has(a.id)?"Unlocked":"Locked"}</span></div>`).join("");
+
+  const news=(G.news||[]).slice(0,30).map(n=>`<div class="kv"><span class="${n.type==='good'?'good':n.type==='bad'?'bad':n.type==='ach'?'warn':''}">${n.text}</span><span class="muted small">S${n.season}</span></div>`).join("") || `<div class="muted small">No news yet.</div>`;
+
+  return `
+  <div class="panel"><h2>Honours &amp; Club Record</h2>${honours}</div>
+  <div class="row">
+    <div class="col"><div class="panel"><h2>Season-by-season</h2>${timeline}</div></div>
+    <div class="col">
+      <div class="panel"><h2>Achievements <span class="muted small">— ${got.size}/${ACHIEVEMENTS.length}</span></h2>${ach}</div>
+    </div>
+  </div>
+  <div class="panel"><h2>📰 News archive</h2>${news}</div>`;
 }
 
 // ---- Table tab ----
@@ -1952,6 +2125,9 @@ function showSeasonReview(s){
 function prepNextSeasonShell(){
   // set up offseason budgets and market WITHOUT advancing fixtures yet; kickoff happens from Home
   G.season++;
+  returnLoanPlayers();                       // loans end after their season
+  if(G.bank>50_000_000) unlock("rich");
+  if(G.season>=10) unlock("legend");
   G.transferBudget = Math.max(0, G.bank);   // you can spend what the club actually has
   G.wageBudget = FIN[G.tier].wageBudget;
   const justPromoted = G.lastSeasonSummary && G.lastSeasonSummary.promoted;
@@ -2000,6 +2176,8 @@ window.buyPlayer=buyPlayer; window.sellPlayer=sellPlayer;
 window.setLineupSlot=setLineupSlot; window.startFromBench=startFromBench; window.autoPickXI=autoPickXI;
 window.setCaptain=setCaptain; window.setPenTaker=setPenTaker; window.shareGame=shareGame;
 window.expandStadium=expandStadium; window.setTicketPrice=setTicketPrice; window.setSponsor=setSponsor;
+window.loanPlayer=loanPlayer; window.renewContract=renewContract;
+function gotoTab(t){ G.tab=t; render(); } window.gotoTab=gotoTab;
 window.startLeagueMatch=startLeagueMatch; window.startCupMatch=startCupMatch;
 window.stepLive=stepLive; window.finalizeLive=finalizeLive; window.setLiveMentality=setLiveMentality; window.liveSub=liveSub;
 
