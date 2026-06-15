@@ -170,221 +170,224 @@ const LAST = ["Smith","Jones","Taylor","Brown","Wilson","Evans","Roberts","Walke
 
 // Real players: {n:name, p:position, r:rating, a:age, lg:league}
 const REAL_PLAYERS = [
-  {n:"Thibaut Courtois",p:"GK",r:90,a:32,lg:"La Liga"},
-  {n:"Alisson",p:"GK",r:89,a:31,lg:"Premier League"},
-  {n:"Marc-André ter Stegen",p:"GK",r:88,a:32,lg:"La Liga"},
-  {n:"Jan Oblak",p:"GK",r:88,a:31,lg:"La Liga"},
-  {n:"Ederson",p:"GK",r:88,a:30,lg:"Premier League"},
-  {n:"Gianluigi Donnarumma",p:"GK",r:88,a:25,lg:"Premier League"},
-  {n:"Mike Maignan",p:"GK",r:87,a:29,lg:"Serie A"},
-  {n:"Emiliano Martínez",p:"GK",r:86,a:31,lg:"Premier League"},
-  {n:"Gregor Kobel",p:"GK",r:86,a:26,lg:"Bundesliga"},
-  {n:"Diogo Costa",p:"GK",r:85,a:24,lg:"Primeira Liga"},
-  {n:"David Raya",p:"GK",r:85,a:28,lg:"Premier League"},
-  {n:"Wojciech Szczęsny",p:"GK",r:85,a:34,lg:"La Liga"},
-  {n:"Jordan Pickford",p:"GK",r:84,a:30,lg:"Premier League"},
-  {n:"Guglielmo Vicario",p:"GK",r:84,a:27,lg:"Premier League"},
-  {n:"Yann Sommer",p:"GK",r:84,a:35,lg:"Serie A"},
-  {n:"Nick Pope",p:"GK",r:83,a:32,lg:"Premier League"},
-  {n:"André Onana",p:"GK",r:83,a:28,lg:"Premier League"},
-  {n:"Aaron Ramsdale",p:"GK",r:82,a:26,lg:"Premier League"},
-  {n:"Bernd Leno",p:"GK",r:82,a:32,lg:"Premier League"},
-  {n:"Kepa Arrizabalaga",p:"GK",r:81,a:29,lg:"Premier League"},
-  {n:"Robert Sánchez",p:"GK",r:80,a:26,lg:"Premier League"},
-  {n:"Sam Johnstone",p:"GK",r:79,a:31,lg:"Premier League"},
-  {n:"Virgil van Dijk",p:"DEF",r:89,a:32,lg:"Premier League"},
-  {n:"Rúben Dias",p:"DEF",r:88,a:27,lg:"Premier League"},
-  {n:"William Saliba",p:"DEF",r:87,a:23,lg:"Premier League"},
-  {n:"Antonio Rüdiger",p:"DEF",r:87,a:31,lg:"La Liga"},
-  {n:"Trent Alexander-Arnold",p:"DEF",r:87,a:25,lg:"La Liga"},
-  {n:"Marquinhos",p:"DEF",r:86,a:30,lg:"Ligue 1"},
-  {n:"Alessandro Bastoni",p:"DEF",r:86,a:25,lg:"Serie A"},
-  {n:"Theo Hernández",p:"DEF",r:85,a:26,lg:"Serie A"},
-  {n:"Achraf Hakimi",p:"DEF",r:85,a:25,lg:"Ligue 1"},
-  {n:"Joško Gvardiol",p:"DEF",r:85,a:22,lg:"Premier League"},
-  {n:"Cristian Romero",p:"DEF",r:85,a:26,lg:"Premier League"},
-  {n:"John Stones",p:"DEF",r:85,a:30,lg:"Premier League"},
-  {n:"Gabriel Magalhães",p:"DEF",r:85,a:26,lg:"Premier League"},
-  {n:"Ronald Araújo",p:"DEF",r:85,a:25,lg:"La Liga"},
-  {n:"Jules Koundé",p:"DEF",r:85,a:25,lg:"La Liga"},
-  {n:"Éder Militão",p:"DEF",r:85,a:26,lg:"La Liga"},
-  {n:"David Alaba",p:"DEF",r:85,a:32,lg:"La Liga"},
-  {n:"Dani Carvajal",p:"DEF",r:85,a:32,lg:"La Liga"},
-  {n:"Matthijs de Ligt",p:"DEF",r:85,a:24,lg:"Premier League"},
-  {n:"Alphonso Davies",p:"DEF",r:84,a:23,lg:"Bundesliga"},
-  {n:"Dayot Upamecano",p:"DEF",r:84,a:25,lg:"Bundesliga"},
-  {n:"Kyle Walker",p:"DEF",r:84,a:34,lg:"Premier League"},
-  {n:"Reece James",p:"DEF",r:84,a:24,lg:"Premier League"},
-  {n:"Manuel Akanji",p:"DEF",r:84,a:29,lg:"Premier League"},
-  {n:"Federico Dimarco",p:"DEF",r:84,a:26,lg:"Serie A"},
-  {n:"Giovanni Di Lorenzo",p:"DEF",r:84,a:30,lg:"Serie A"},
-  {n:"Andrew Robertson",p:"DEF",r:84,a:30,lg:"Premier League"},
-  {n:"Ibrahima Konaté",p:"DEF",r:84,a:25,lg:"Premier League"},
-  {n:"Jonathan Tah",p:"DEF",r:83,a:28,lg:"Bundesliga"},
-  {n:"Kieran Trippier",p:"DEF",r:83,a:33,lg:"Premier League"},
-  {n:"Ben White",p:"DEF",r:83,a:26,lg:"Premier League"},
-  {n:"Lisandro Martínez",p:"DEF",r:83,a:26,lg:"Premier League"},
-  {n:"Aymeric Laporte",p:"DEF",r:83,a:30,lg:"La Liga"},
-  {n:"Fikayo Tomori",p:"DEF",r:83,a:26,lg:"Serie A"},
-  {n:"Benjamin Pavard",p:"DEF",r:83,a:28,lg:"Serie A"},
-  {n:"Robin Le Normand",p:"DEF",r:82,a:28,lg:"La Liga"},
-  {n:"Nathan Aké",p:"DEF",r:82,a:29,lg:"Premier League"},
-  {n:"Diogo Dalot",p:"DEF",r:82,a:25,lg:"Premier League"},
-  {n:"Pervis Estupiñán",p:"DEF",r:82,a:26,lg:"Premier League"},
-  {n:"Pedro Porro",p:"DEF",r:82,a:24,lg:"Premier League"},
-  {n:"Luke Shaw",p:"DEF",r:81,a:28,lg:"Premier League"},
-  {n:"Pau Torres",p:"DEF",r:81,a:27,lg:"Premier League"},
-  {n:"Destiny Udogie",p:"DEF",r:81,a:21,lg:"Premier League"},
-  {n:"Marc Guéhi",p:"DEF",r:81,a:24,lg:"Premier League"},
-  {n:"Pau Cubarsí",p:"DEF",r:81,a:18,lg:"La Liga"},
-  {n:"Levi Colwill",p:"DEF",r:80,a:21,lg:"Premier League"},
-  {n:"Sven Botman",p:"DEF",r:80,a:24,lg:"Premier League"},
-  {n:"Ezri Konsa",p:"DEF",r:80,a:26,lg:"Premier League"},
-  {n:"Harry Maguire",p:"DEF",r:80,a:31,lg:"Premier League"},
-  {n:"Lewis Dunk",p:"DEF",r:80,a:32,lg:"Premier League"},
-  {n:"Joachim Andersen",p:"DEF",r:80,a:28,lg:"Premier League"},
-  {n:"Max Kilman",p:"DEF",r:79,a:27,lg:"Premier League"},
-  {n:"Tyrone Mings",p:"DEF",r:79,a:31,lg:"Premier League"},
-  {n:"Kurt Zouma",p:"DEF",r:79,a:29,lg:"Premier League"},
-  {n:"Antonee Robinson",p:"DEF",r:78,a:26,lg:"Premier League"},
-  {n:"Tyrick Mitchell",p:"DEF",r:77,a:24,lg:"Premier League"},
-  {n:"Rodri",p:"MID",r:91,a:28,lg:"Premier League"},
-  {n:"Kevin De Bruyne",p:"MID",r:90,a:33,lg:"Serie A"},
-  {n:"Jude Bellingham",p:"MID",r:90,a:21,lg:"La Liga"},
-  {n:"Federico Valverde",p:"MID",r:88,a:25,lg:"La Liga"},
-  {n:"Martin Ødegaard",p:"MID",r:88,a:25,lg:"Premier League"},
-  {n:"Bernardo Silva",p:"MID",r:88,a:29,lg:"Premier League"},
-  {n:"Phil Foden",p:"MID",r:88,a:24,lg:"Premier League"},
-  {n:"Jamal Musiala",p:"MID",r:88,a:21,lg:"Bundesliga"},
-  {n:"Florian Wirtz",p:"MID",r:88,a:21,lg:"Premier League"},
-  {n:"Joshua Kimmich",p:"MID",r:87,a:29,lg:"Bundesliga"},
-  {n:"Bruno Fernandes",p:"MID",r:87,a:29,lg:"Premier League"},
-  {n:"Luka Modrić",p:"MID",r:86,a:38,lg:"Serie A"},
-  {n:"Declan Rice",p:"MID",r:86,a:25,lg:"Premier League"},
-  {n:"Pedri",p:"MID",r:86,a:21,lg:"La Liga"},
-  {n:"Frenkie de Jong",p:"MID",r:86,a:27,lg:"La Liga"},
-  {n:"Nicolò Barella",p:"MID",r:86,a:27,lg:"Serie A"},
-  {n:"Bruno Guimarães",p:"MID",r:85,a:26,lg:"Premier League"},
-  {n:"İlkay Gündoğan",p:"MID",r:85,a:33,lg:"Premier League"},
-  {n:"Aurélien Tchouaméni",p:"MID",r:85,a:24,lg:"La Liga"},
-  {n:"Hakan Çalhanoğlu",p:"MID",r:84,a:30,lg:"Serie A"},
-  {n:"Vitinha",p:"MID",r:84,a:25,lg:"Ligue 1"},
-  {n:"Leon Goretzka",p:"MID",r:84,a:29,lg:"Bundesliga"},
-  {n:"Eduardo Camavinga",p:"MID",r:84,a:21,lg:"La Liga"},
-  {n:"Alexis Mac Allister",p:"MID",r:84,a:25,lg:"Premier League"},
-  {n:"Granit Xhaka",p:"MID",r:84,a:31,lg:"Premier League"},
-  {n:"Enzo Fernández",p:"MID",r:84,a:23,lg:"Premier League"},
-  {n:"Gavi",p:"MID",r:84,a:20,lg:"La Liga"},
-  {n:"Xavi Simons",p:"MID",r:84,a:21,lg:"Bundesliga"},
-  {n:"Teun Koopmeiners",p:"MID",r:83,a:26,lg:"Serie A"},
-  {n:"Dominik Szoboszlai",p:"MID",r:83,a:23,lg:"Premier League"},
-  {n:"James Maddison",p:"MID",r:83,a:27,lg:"Premier League"},
-  {n:"Moisés Caicedo",p:"MID",r:83,a:22,lg:"Premier League"},
-  {n:"Sandro Tonali",p:"MID",r:83,a:24,lg:"Premier League"},
-  {n:"João Palhinha",p:"MID",r:83,a:28,lg:"Bundesliga"},
-  {n:"Dani Olmo",p:"MID",r:83,a:26,lg:"La Liga"},
-  {n:"João Neves",p:"MID",r:83,a:20,lg:"Ligue 1"},
-  {n:"Douglas Luiz",p:"MID",r:82,a:26,lg:"Serie A"},
-  {n:"Julian Brandt",p:"MID",r:82,a:28,lg:"Bundesliga"},
-  {n:"Marcos Llorente",p:"MID",r:82,a:29,lg:"La Liga"},
-  {n:"N'Golo Kanté",p:"MID",r:82,a:33,lg:"Saudi Pro League"},
-  {n:"Youri Tielemans",p:"MID",r:81,a:27,lg:"Premier League"},
-  {n:"Arda Güler",p:"MID",r:81,a:19,lg:"La Liga"},
-  {n:"Pierre-Emile Højbjerg",p:"MID",r:80,a:28,lg:"Ligue 1"},
-  {n:"Conor Gallagher",p:"MID",r:80,a:24,lg:"La Liga"},
-  {n:"Mason Mount",p:"MID",r:80,a:25,lg:"Premier League"},
-  {n:"Ryan Gravenberch",p:"MID",r:80,a:22,lg:"Premier League"},
-  {n:"John McGinn",p:"MID",r:80,a:29,lg:"Premier League"},
-  {n:"Boubacar Kamara",p:"MID",r:80,a:24,lg:"Premier League"},
-  {n:"Fermín López",p:"MID",r:80,a:21,lg:"La Liga"},
-  {n:"Nico Paz",p:"MID",r:80,a:20,lg:"Serie A"},
-  {n:"Kobbie Mainoo",p:"MID",r:79,a:19,lg:"Premier League"},
-  {n:"Curtis Jones",p:"MID",r:79,a:23,lg:"Premier League"},
-  {n:"Scott McTominay",p:"MID",r:79,a:27,lg:"Serie A"},
-  {n:"Morgan Gibbs-White",p:"MID",r:79,a:24,lg:"Premier League"},
-  {n:"Kalvin Phillips",p:"MID",r:78,a:28,lg:"Premier League"},
-  {n:"Adam Wharton",p:"MID",r:78,a:20,lg:"Premier League"},
-  {n:"Jordan Henderson",p:"MID",r:78,a:34,lg:"Premier League"},
-  {n:"Angel Gomes",p:"MID",r:76,a:24,lg:"Ligue 1"},
-  {n:"Sander Berge",p:"MID",r:76,a:26,lg:"Premier League"},
-  {n:"Erling Haaland",p:"FWD",r:91,a:24,lg:"Premier League"},
-  {n:"Kylian Mbappé",p:"FWD",r:91,a:25,lg:"La Liga"},
-  {n:"Harry Kane",p:"FWD",r:90,a:30,lg:"Bundesliga"},
-  {n:"Vinícius Júnior",p:"FWD",r:89,a:24,lg:"La Liga"},
-  {n:"Mohamed Salah",p:"FWD",r:89,a:32,lg:"Premier League"},
-  {n:"Robert Lewandowski",p:"FWD",r:88,a:35,lg:"La Liga"},
-  {n:"Victor Osimhen",p:"FWD",r:88,a:25,lg:"Serie A"},
-  {n:"Lionel Messi",p:"FWD",r:88,a:37,lg:"MLS"},
-  {n:"Lautaro Martínez",p:"FWD",r:87,a:26,lg:"Serie A"},
-  {n:"Son Heung-min",p:"FWD",r:87,a:31,lg:"Premier League"},
-  {n:"Bukayo Saka",p:"FWD",r:87,a:22,lg:"Premier League"},
-  {n:"Antoine Griezmann",p:"FWD",r:87,a:33,lg:"La Liga"},
-  {n:"Lamine Yamal",p:"FWD",r:87,a:17,lg:"La Liga"},
-  {n:"Cole Palmer",p:"FWD",r:86,a:22,lg:"Premier League"},
-  {n:"Rafael Leão",p:"FWD",r:86,a:25,lg:"Serie A"},
-  {n:"Khvicha Kvaratskhelia",p:"FWD",r:86,a:23,lg:"Ligue 1"},
-  {n:"Raphinha",p:"FWD",r:86,a:28,lg:"La Liga"},
-  {n:"Viktor Gyökeres",p:"FWD",r:86,a:26,lg:"Premier League"},
-  {n:"Cristiano Ronaldo",p:"FWD",r:86,a:39,lg:"Saudi Pro League"},
-  {n:"Ousmane Dembélé",p:"FWD",r:85,a:27,lg:"Ligue 1"},
-  {n:"Leroy Sané",p:"FWD",r:85,a:28,lg:"Bundesliga"},
-  {n:"Julián Álvarez",p:"FWD",r:85,a:24,lg:"La Liga"},
-  {n:"Alexander Isak",p:"FWD",r:85,a:24,lg:"Premier League"},
-  {n:"Rodrygo",p:"FWD",r:85,a:24,lg:"La Liga"},
-  {n:"Kingsley Coman",p:"FWD",r:84,a:27,lg:"Bundesliga"},
-  {n:"Marcus Rashford",p:"FWD",r:84,a:26,lg:"La Liga"},
-  {n:"Ollie Watkins",p:"FWD",r:84,a:28,lg:"Premier League"},
-  {n:"Romelu Lukaku",p:"FWD",r:84,a:31,lg:"Serie A"},
-  {n:"Dušan Vlahović",p:"FWD",r:84,a:24,lg:"Serie A"},
-  {n:"Marcus Thuram",p:"FWD",r:84,a:27,lg:"Serie A"},
-  {n:"Nico Williams",p:"FWD",r:84,a:22,lg:"La Liga"},
-  {n:"Karim Benzema",p:"FWD",r:84,a:36,lg:"Saudi Pro League"},
-  {n:"Jack Grealish",p:"FWD",r:83,a:28,lg:"Premier League"},
-  {n:"Serge Gnabry",p:"FWD",r:83,a:28,lg:"Bundesliga"},
-  {n:"Gabriel Jesus",p:"FWD",r:83,a:27,lg:"Premier League"},
-  {n:"Gabriel Martinelli",p:"FWD",r:83,a:23,lg:"Premier League"},
-  {n:"Jarrod Bowen",p:"FWD",r:83,a:27,lg:"Premier League"},
-  {n:"Michael Olise",p:"FWD",r:83,a:22,lg:"Bundesliga"},
-  {n:"Serhou Guirassy",p:"FWD",r:83,a:28,lg:"Bundesliga"},
-  {n:"Paulo Dybala",p:"FWD",r:83,a:30,lg:"Serie A"},
-  {n:"Ademola Lookman",p:"FWD",r:83,a:26,lg:"Serie A"},
-  {n:"Christian Pulisic",p:"FWD",r:83,a:26,lg:"Serie A"},
-  {n:"Bradley Barcola",p:"FWD",r:83,a:22,lg:"Ligue 1"},
-  {n:"Anthony Gordon",p:"FWD",r:82,a:23,lg:"Premier League"},
-  {n:"Federico Chiesa",p:"FWD",r:82,a:26,lg:"Premier League"},
-  {n:"Darwin Núñez",p:"FWD",r:82,a:25,lg:"Premier League"},
-  {n:"Ivan Toney",p:"FWD",r:82,a:28,lg:"Saudi Pro League"},
-  {n:"Dominic Solanke",p:"FWD",r:82,a:26,lg:"Premier League"},
-  {n:"Mohammed Kudus",p:"FWD",r:82,a:23,lg:"Premier League"},
-  {n:"Eberechi Eze",p:"FWD",r:82,a:26,lg:"Premier League"},
-  {n:"Raheem Sterling",p:"FWD",r:82,a:29,lg:"Premier League"},
-  {n:"Álvaro Morata",p:"FWD",r:82,a:31,lg:"Serie A"},
-  {n:"Mikel Oyarzabal",p:"FWD",r:82,a:27,lg:"La Liga"},
-  {n:"Mason Greenwood",p:"FWD",r:82,a:23,lg:"Ligue 1"},
-  {n:"Sadio Mané",p:"FWD",r:82,a:32,lg:"Saudi Pro League"},
-  {n:"Désiré Doué",p:"FWD",r:82,a:20,lg:"Ligue 1"},
-  {n:"Jonathan David",p:"FWD",r:82,a:25,lg:"Serie A"},
-  {n:"Riyad Mahrez",p:"FWD",r:81,a:33,lg:"Saudi Pro League"},
-  {n:"Nicolas Jackson",p:"FWD",r:80,a:23,lg:"Premier League"},
-  {n:"Joshua Zirkzee",p:"FWD",r:80,a:23,lg:"Premier League"},
-  {n:"Rasmus Højlund",p:"FWD",r:80,a:21,lg:"Premier League"},
-  {n:"Deniz Undav",p:"FWD",r:80,a:28,lg:"Bundesliga"},
-  {n:"Take Kubo",p:"FWD",r:80,a:23,lg:"La Liga"},
-  {n:"Karim Adeyemi",p:"FWD",r:80,a:22,lg:"Bundesliga"},
-  {n:"Callum Wilson",p:"FWD",r:79,a:32,lg:"Premier League"},
-  {n:"Luis Suárez",p:"FWD",r:79,a:37,lg:"MLS"},
-  {n:"Evan Ferguson",p:"FWD",r:78,a:19,lg:"Premier League"},
-  {n:"Jamie Vardy",p:"FWD",r:78,a:37,lg:"Premier League"},
-  {n:"Dominic Calvert-Lewin",p:"FWD",r:78,a:27,lg:"Premier League"},
-  {n:"Brennan Johnson",p:"FWD",r:78,a:23,lg:"Premier League"},
-  {n:"Eddie Nketiah",p:"FWD",r:77,a:25,lg:"Premier League"},
-  {n:"Anthony Elanga",p:"FWD",r:77,a:22,lg:"Premier League"},
-  {n:"Chris Wood",p:"FWD",r:77,a:32,lg:"Premier League"},
-  {n:"Danny Ings",p:"FWD",r:75,a:31,lg:"Premier League"},
+  {n:"Thibaut Courtois",p:"GK",r:90,a:32,lg:"La Liga",nat:"Belgium"},
+  {n:"Alisson",p:"GK",r:89,a:31,lg:"Premier League",nat:"Brazil"},
+  {n:"Marc-André ter Stegen",p:"GK",r:88,a:32,lg:"La Liga",nat:"Germany"},
+  {n:"Jan Oblak",p:"GK",r:88,a:31,lg:"La Liga",nat:"Slovenia"},
+  {n:"Ederson",p:"GK",r:88,a:30,lg:"Premier League",nat:"Brazil"},
+  {n:"Gianluigi Donnarumma",p:"GK",r:88,a:25,lg:"Premier League",nat:"Italy"},
+  {n:"Mike Maignan",p:"GK",r:87,a:29,lg:"Serie A",nat:"France"},
+  {n:"Emiliano Martínez",p:"GK",r:86,a:31,lg:"Premier League",nat:"Argentina"},
+  {n:"Gregor Kobel",p:"GK",r:86,a:26,lg:"Bundesliga",nat:"Switzerland"},
+  {n:"Diogo Costa",p:"GK",r:85,a:24,lg:"Primeira Liga",nat:"Portugal"},
+  {n:"David Raya",p:"GK",r:85,a:28,lg:"Premier League",nat:"Spain"},
+  {n:"Wojciech Szczęsny",p:"GK",r:85,a:34,lg:"La Liga",nat:"Poland"},
+  {n:"Jordan Pickford",p:"GK",r:84,a:30,lg:"Premier League",nat:"England"},
+  {n:"Guglielmo Vicario",p:"GK",r:84,a:27,lg:"Premier League",nat:"Italy"},
+  {n:"Yann Sommer",p:"GK",r:84,a:35,lg:"Serie A",nat:"Switzerland"},
+  {n:"Nick Pope",p:"GK",r:83,a:32,lg:"Premier League",nat:"England"},
+  {n:"André Onana",p:"GK",r:83,a:28,lg:"Premier League",nat:"Cameroon"},
+  {n:"Aaron Ramsdale",p:"GK",r:82,a:26,lg:"Premier League",nat:"England"},
+  {n:"Bernd Leno",p:"GK",r:82,a:32,lg:"Premier League",nat:"Germany"},
+  {n:"Kepa Arrizabalaga",p:"GK",r:81,a:29,lg:"Premier League",nat:"Spain"},
+  {n:"Robert Sánchez",p:"GK",r:80,a:26,lg:"Premier League",nat:"Spain"},
+  {n:"Sam Johnstone",p:"GK",r:79,a:31,lg:"Premier League",nat:"England"},
+  {n:"Virgil van Dijk",p:"DEF",r:89,a:32,lg:"Premier League",nat:"Netherlands"},
+  {n:"Rúben Dias",p:"DEF",r:88,a:27,lg:"Premier League",nat:"Portugal"},
+  {n:"William Saliba",p:"DEF",r:87,a:23,lg:"Premier League",nat:"France"},
+  {n:"Antonio Rüdiger",p:"DEF",r:87,a:31,lg:"La Liga",nat:"Germany"},
+  {n:"Trent Alexander-Arnold",p:"DEF",r:87,a:25,lg:"La Liga",nat:"England"},
+  {n:"Marquinhos",p:"DEF",r:86,a:30,lg:"Ligue 1",nat:"Brazil"},
+  {n:"Alessandro Bastoni",p:"DEF",r:86,a:25,lg:"Serie A",nat:"Italy"},
+  {n:"Theo Hernández",p:"DEF",r:85,a:26,lg:"Serie A",nat:"France"},
+  {n:"Achraf Hakimi",p:"DEF",r:85,a:25,lg:"Ligue 1",nat:"Morocco"},
+  {n:"Joško Gvardiol",p:"DEF",r:85,a:22,lg:"Premier League",nat:"Croatia"},
+  {n:"Cristian Romero",p:"DEF",r:85,a:26,lg:"Premier League",nat:"Argentina"},
+  {n:"John Stones",p:"DEF",r:85,a:30,lg:"Premier League",nat:"England"},
+  {n:"Gabriel Magalhães",p:"DEF",r:85,a:26,lg:"Premier League",nat:"Brazil"},
+  {n:"Ronald Araújo",p:"DEF",r:85,a:25,lg:"La Liga",nat:"Uruguay"},
+  {n:"Jules Koundé",p:"DEF",r:85,a:25,lg:"La Liga",nat:"France"},
+  {n:"Éder Militão",p:"DEF",r:85,a:26,lg:"La Liga",nat:"Brazil"},
+  {n:"David Alaba",p:"DEF",r:85,a:32,lg:"La Liga",nat:"Austria"},
+  {n:"Dani Carvajal",p:"DEF",r:85,a:32,lg:"La Liga",nat:"Spain"},
+  {n:"Matthijs de Ligt",p:"DEF",r:85,a:24,lg:"Premier League",nat:"Netherlands"},
+  {n:"Alphonso Davies",p:"DEF",r:84,a:23,lg:"Bundesliga",nat:"Canada"},
+  {n:"Dayot Upamecano",p:"DEF",r:84,a:25,lg:"Bundesliga",nat:"France"},
+  {n:"Kyle Walker",p:"DEF",r:84,a:34,lg:"Premier League",nat:"England"},
+  {n:"Reece James",p:"DEF",r:84,a:24,lg:"Premier League",nat:"England"},
+  {n:"Manuel Akanji",p:"DEF",r:84,a:29,lg:"Premier League",nat:"Switzerland"},
+  {n:"Federico Dimarco",p:"DEF",r:84,a:26,lg:"Serie A",nat:"Italy"},
+  {n:"Giovanni Di Lorenzo",p:"DEF",r:84,a:30,lg:"Serie A",nat:"Italy"},
+  {n:"Andrew Robertson",p:"DEF",r:84,a:30,lg:"Premier League",nat:"Scotland"},
+  {n:"Ibrahima Konaté",p:"DEF",r:84,a:25,lg:"Premier League",nat:"France"},
+  {n:"Jonathan Tah",p:"DEF",r:83,a:28,lg:"Bundesliga",nat:"Germany"},
+  {n:"Kieran Trippier",p:"DEF",r:83,a:33,lg:"Premier League",nat:"England"},
+  {n:"Ben White",p:"DEF",r:83,a:26,lg:"Premier League",nat:"England"},
+  {n:"Lisandro Martínez",p:"DEF",r:83,a:26,lg:"Premier League",nat:"Argentina"},
+  {n:"Aymeric Laporte",p:"DEF",r:83,a:30,lg:"La Liga",nat:"Spain"},
+  {n:"Fikayo Tomori",p:"DEF",r:83,a:26,lg:"Serie A",nat:"England"},
+  {n:"Benjamin Pavard",p:"DEF",r:83,a:28,lg:"Serie A",nat:"France"},
+  {n:"Robin Le Normand",p:"DEF",r:82,a:28,lg:"La Liga",nat:"Spain"},
+  {n:"Nathan Aké",p:"DEF",r:82,a:29,lg:"Premier League",nat:"Netherlands"},
+  {n:"Diogo Dalot",p:"DEF",r:82,a:25,lg:"Premier League",nat:"Portugal"},
+  {n:"Pervis Estupiñán",p:"DEF",r:82,a:26,lg:"Premier League",nat:"Ecuador"},
+  {n:"Pedro Porro",p:"DEF",r:82,a:24,lg:"Premier League",nat:"Spain"},
+  {n:"Luke Shaw",p:"DEF",r:81,a:28,lg:"Premier League",nat:"England"},
+  {n:"Pau Torres",p:"DEF",r:81,a:27,lg:"Premier League",nat:"Spain"},
+  {n:"Destiny Udogie",p:"DEF",r:81,a:21,lg:"Premier League",nat:"Italy"},
+  {n:"Marc Guéhi",p:"DEF",r:81,a:24,lg:"Premier League",nat:"England"},
+  {n:"Pau Cubarsí",p:"DEF",r:81,a:18,lg:"La Liga",nat:"Spain"},
+  {n:"Levi Colwill",p:"DEF",r:80,a:21,lg:"Premier League",nat:"England"},
+  {n:"Sven Botman",p:"DEF",r:80,a:24,lg:"Premier League",nat:"Netherlands"},
+  {n:"Ezri Konsa",p:"DEF",r:80,a:26,lg:"Premier League",nat:"England"},
+  {n:"Harry Maguire",p:"DEF",r:80,a:31,lg:"Premier League",nat:"England"},
+  {n:"Lewis Dunk",p:"DEF",r:80,a:32,lg:"Premier League",nat:"England"},
+  {n:"Joachim Andersen",p:"DEF",r:80,a:28,lg:"Premier League",nat:"Denmark"},
+  {n:"Max Kilman",p:"DEF",r:79,a:27,lg:"Premier League",nat:"England"},
+  {n:"Tyrone Mings",p:"DEF",r:79,a:31,lg:"Premier League",nat:"England"},
+  {n:"Kurt Zouma",p:"DEF",r:79,a:29,lg:"Premier League",nat:"France"},
+  {n:"Antonee Robinson",p:"DEF",r:78,a:26,lg:"Premier League",nat:"USA"},
+  {n:"Tyrick Mitchell",p:"DEF",r:77,a:24,lg:"Premier League",nat:"England"},
+  {n:"Rodri",p:"MID",r:91,a:28,lg:"Premier League",nat:"Spain"},
+  {n:"Kevin De Bruyne",p:"MID",r:90,a:33,lg:"Serie A",nat:"Belgium"},
+  {n:"Jude Bellingham",p:"MID",r:90,a:21,lg:"La Liga",nat:"England"},
+  {n:"Federico Valverde",p:"MID",r:88,a:25,lg:"La Liga",nat:"Uruguay"},
+  {n:"Martin Ødegaard",p:"MID",r:88,a:25,lg:"Premier League",nat:"Norway"},
+  {n:"Bernardo Silva",p:"MID",r:88,a:29,lg:"Premier League",nat:"Portugal"},
+  {n:"Phil Foden",p:"MID",r:88,a:24,lg:"Premier League",nat:"England"},
+  {n:"Jamal Musiala",p:"MID",r:88,a:21,lg:"Bundesliga",nat:"Germany"},
+  {n:"Florian Wirtz",p:"MID",r:88,a:21,lg:"Premier League",nat:"Germany"},
+  {n:"Joshua Kimmich",p:"MID",r:87,a:29,lg:"Bundesliga",nat:"Germany"},
+  {n:"Bruno Fernandes",p:"MID",r:87,a:29,lg:"Premier League",nat:"Portugal"},
+  {n:"Luka Modrić",p:"MID",r:86,a:38,lg:"Serie A",nat:"Croatia"},
+  {n:"Declan Rice",p:"MID",r:86,a:25,lg:"Premier League",nat:"England"},
+  {n:"Pedri",p:"MID",r:86,a:21,lg:"La Liga",nat:"Spain"},
+  {n:"Frenkie de Jong",p:"MID",r:86,a:27,lg:"La Liga",nat:"Netherlands"},
+  {n:"Nicolò Barella",p:"MID",r:86,a:27,lg:"Serie A",nat:"Italy"},
+  {n:"Bruno Guimarães",p:"MID",r:85,a:26,lg:"Premier League",nat:"Brazil"},
+  {n:"İlkay Gündoğan",p:"MID",r:85,a:33,lg:"Premier League",nat:"Germany"},
+  {n:"Aurélien Tchouaméni",p:"MID",r:85,a:24,lg:"La Liga",nat:"France"},
+  {n:"Hakan Çalhanoğlu",p:"MID",r:84,a:30,lg:"Serie A",nat:"Turkey"},
+  {n:"Vitinha",p:"MID",r:84,a:25,lg:"Ligue 1",nat:"Portugal"},
+  {n:"Leon Goretzka",p:"MID",r:84,a:29,lg:"Bundesliga",nat:"Germany"},
+  {n:"Eduardo Camavinga",p:"MID",r:84,a:21,lg:"La Liga",nat:"France"},
+  {n:"Alexis Mac Allister",p:"MID",r:84,a:25,lg:"Premier League",nat:"Argentina"},
+  {n:"Granit Xhaka",p:"MID",r:84,a:31,lg:"Premier League",nat:"Switzerland"},
+  {n:"Enzo Fernández",p:"MID",r:84,a:23,lg:"Premier League",nat:"Argentina"},
+  {n:"Gavi",p:"MID",r:84,a:20,lg:"La Liga",nat:"Spain"},
+  {n:"Xavi Simons",p:"MID",r:84,a:21,lg:"Bundesliga",nat:"Netherlands"},
+  {n:"Teun Koopmeiners",p:"MID",r:83,a:26,lg:"Serie A",nat:"Netherlands"},
+  {n:"Dominik Szoboszlai",p:"MID",r:83,a:23,lg:"Premier League",nat:"Hungary"},
+  {n:"James Maddison",p:"MID",r:83,a:27,lg:"Premier League",nat:"England"},
+  {n:"Moisés Caicedo",p:"MID",r:83,a:22,lg:"Premier League",nat:"Ecuador"},
+  {n:"Sandro Tonali",p:"MID",r:83,a:24,lg:"Premier League",nat:"Italy"},
+  {n:"João Palhinha",p:"MID",r:83,a:28,lg:"Bundesliga",nat:"Portugal"},
+  {n:"Dani Olmo",p:"MID",r:83,a:26,lg:"La Liga",nat:"Spain"},
+  {n:"João Neves",p:"MID",r:83,a:20,lg:"Ligue 1",nat:"Portugal"},
+  {n:"Douglas Luiz",p:"MID",r:82,a:26,lg:"Serie A",nat:"Brazil"},
+  {n:"Julian Brandt",p:"MID",r:82,a:28,lg:"Bundesliga",nat:"Germany"},
+  {n:"Marcos Llorente",p:"MID",r:82,a:29,lg:"La Liga",nat:"Spain"},
+  {n:"N'Golo Kanté",p:"MID",r:82,a:33,lg:"Saudi Pro League",nat:"France"},
+  {n:"Youri Tielemans",p:"MID",r:81,a:27,lg:"Premier League",nat:"Belgium"},
+  {n:"Arda Güler",p:"MID",r:81,a:19,lg:"La Liga",nat:"Turkey"},
+  {n:"Pierre-Emile Højbjerg",p:"MID",r:80,a:28,lg:"Ligue 1",nat:"Denmark"},
+  {n:"Conor Gallagher",p:"MID",r:80,a:24,lg:"La Liga",nat:"England"},
+  {n:"Mason Mount",p:"MID",r:80,a:25,lg:"Premier League",nat:"England"},
+  {n:"Ryan Gravenberch",p:"MID",r:80,a:22,lg:"Premier League",nat:"Netherlands"},
+  {n:"John McGinn",p:"MID",r:80,a:29,lg:"Premier League",nat:"Scotland"},
+  {n:"Boubacar Kamara",p:"MID",r:80,a:24,lg:"Premier League",nat:"France"},
+  {n:"Fermín López",p:"MID",r:80,a:21,lg:"La Liga",nat:"Spain"},
+  {n:"Nico Paz",p:"MID",r:80,a:20,lg:"Serie A",nat:"Argentina"},
+  {n:"Kobbie Mainoo",p:"MID",r:79,a:19,lg:"Premier League",nat:"England"},
+  {n:"Curtis Jones",p:"MID",r:79,a:23,lg:"Premier League",nat:"England"},
+  {n:"Scott McTominay",p:"MID",r:79,a:27,lg:"Serie A",nat:"Scotland"},
+  {n:"Morgan Gibbs-White",p:"MID",r:79,a:24,lg:"Premier League",nat:"England"},
+  {n:"Kalvin Phillips",p:"MID",r:78,a:28,lg:"Premier League",nat:"England"},
+  {n:"Adam Wharton",p:"MID",r:78,a:20,lg:"Premier League",nat:"England"},
+  {n:"Jordan Henderson",p:"MID",r:78,a:34,lg:"Premier League",nat:"England"},
+  {n:"Angel Gomes",p:"MID",r:76,a:24,lg:"Ligue 1",nat:"England"},
+  {n:"Sander Berge",p:"MID",r:76,a:26,lg:"Premier League",nat:"Norway"},
+  {n:"Erling Haaland",p:"FWD",r:91,a:24,lg:"Premier League",nat:"Norway"},
+  {n:"Kylian Mbappé",p:"FWD",r:91,a:25,lg:"La Liga",nat:"France"},
+  {n:"Harry Kane",p:"FWD",r:90,a:30,lg:"Bundesliga",nat:"England"},
+  {n:"Vinícius Júnior",p:"FWD",r:89,a:24,lg:"La Liga",nat:"Brazil"},
+  {n:"Mohamed Salah",p:"FWD",r:89,a:32,lg:"Premier League",nat:"Egypt"},
+  {n:"Robert Lewandowski",p:"FWD",r:88,a:35,lg:"La Liga",nat:"Poland"},
+  {n:"Victor Osimhen",p:"FWD",r:88,a:25,lg:"Serie A",nat:"Nigeria"},
+  {n:"Lionel Messi",p:"FWD",r:88,a:37,lg:"MLS",nat:"Argentina"},
+  {n:"Lautaro Martínez",p:"FWD",r:87,a:26,lg:"Serie A",nat:"Argentina"},
+  {n:"Son Heung-min",p:"FWD",r:87,a:31,lg:"Premier League",nat:"South Korea"},
+  {n:"Bukayo Saka",p:"FWD",r:87,a:22,lg:"Premier League",nat:"England"},
+  {n:"Antoine Griezmann",p:"FWD",r:87,a:33,lg:"La Liga",nat:"France"},
+  {n:"Lamine Yamal",p:"FWD",r:87,a:17,lg:"La Liga",nat:"Spain"},
+  {n:"Cole Palmer",p:"FWD",r:86,a:22,lg:"Premier League",nat:"England"},
+  {n:"Rafael Leão",p:"FWD",r:86,a:25,lg:"Serie A",nat:"Portugal"},
+  {n:"Khvicha Kvaratskhelia",p:"FWD",r:86,a:23,lg:"Ligue 1",nat:"Georgia"},
+  {n:"Raphinha",p:"FWD",r:86,a:28,lg:"La Liga",nat:"Brazil"},
+  {n:"Viktor Gyökeres",p:"FWD",r:86,a:26,lg:"Premier League",nat:"Sweden"},
+  {n:"Cristiano Ronaldo",p:"FWD",r:86,a:39,lg:"Saudi Pro League",nat:"Portugal"},
+  {n:"Ousmane Dembélé",p:"FWD",r:85,a:27,lg:"Ligue 1",nat:"France"},
+  {n:"Leroy Sané",p:"FWD",r:85,a:28,lg:"Bundesliga",nat:"Germany"},
+  {n:"Julián Álvarez",p:"FWD",r:85,a:24,lg:"La Liga",nat:"Argentina"},
+  {n:"Alexander Isak",p:"FWD",r:85,a:24,lg:"Premier League",nat:"Sweden"},
+  {n:"Rodrygo",p:"FWD",r:85,a:24,lg:"La Liga",nat:"Brazil"},
+  {n:"Kingsley Coman",p:"FWD",r:84,a:27,lg:"Bundesliga",nat:"France"},
+  {n:"Marcus Rashford",p:"FWD",r:84,a:26,lg:"La Liga",nat:"England"},
+  {n:"Ollie Watkins",p:"FWD",r:84,a:28,lg:"Premier League",nat:"England"},
+  {n:"Romelu Lukaku",p:"FWD",r:84,a:31,lg:"Serie A",nat:"Belgium"},
+  {n:"Dušan Vlahović",p:"FWD",r:84,a:24,lg:"Serie A",nat:"Serbia"},
+  {n:"Marcus Thuram",p:"FWD",r:84,a:27,lg:"Serie A",nat:"France"},
+  {n:"Nico Williams",p:"FWD",r:84,a:22,lg:"La Liga",nat:"Spain"},
+  {n:"Karim Benzema",p:"FWD",r:84,a:36,lg:"Saudi Pro League",nat:"France"},
+  {n:"Jack Grealish",p:"FWD",r:83,a:28,lg:"Premier League",nat:"England"},
+  {n:"Serge Gnabry",p:"FWD",r:83,a:28,lg:"Bundesliga",nat:"Germany"},
+  {n:"Gabriel Jesus",p:"FWD",r:83,a:27,lg:"Premier League",nat:"Brazil"},
+  {n:"Gabriel Martinelli",p:"FWD",r:83,a:23,lg:"Premier League",nat:"Brazil"},
+  {n:"Jarrod Bowen",p:"FWD",r:83,a:27,lg:"Premier League",nat:"England"},
+  {n:"Michael Olise",p:"FWD",r:83,a:22,lg:"Bundesliga",nat:"France"},
+  {n:"Serhou Guirassy",p:"FWD",r:83,a:28,lg:"Bundesliga",nat:"Guinea"},
+  {n:"Paulo Dybala",p:"FWD",r:83,a:30,lg:"Serie A",nat:"Argentina"},
+  {n:"Ademola Lookman",p:"FWD",r:83,a:26,lg:"Serie A",nat:"Nigeria"},
+  {n:"Christian Pulisic",p:"FWD",r:83,a:26,lg:"Serie A",nat:"USA"},
+  {n:"Bradley Barcola",p:"FWD",r:83,a:22,lg:"Ligue 1",nat:"France"},
+  {n:"Anthony Gordon",p:"FWD",r:82,a:23,lg:"Premier League",nat:"England"},
+  {n:"Federico Chiesa",p:"FWD",r:82,a:26,lg:"Premier League",nat:"Italy"},
+  {n:"Darwin Núñez",p:"FWD",r:82,a:25,lg:"Premier League",nat:"Uruguay"},
+  {n:"Ivan Toney",p:"FWD",r:82,a:28,lg:"Saudi Pro League",nat:"England"},
+  {n:"Dominic Solanke",p:"FWD",r:82,a:26,lg:"Premier League",nat:"England"},
+  {n:"Mohammed Kudus",p:"FWD",r:82,a:23,lg:"Premier League",nat:"Ghana"},
+  {n:"Eberechi Eze",p:"FWD",r:82,a:26,lg:"Premier League",nat:"England"},
+  {n:"Raheem Sterling",p:"FWD",r:82,a:29,lg:"Premier League",nat:"England"},
+  {n:"Álvaro Morata",p:"FWD",r:82,a:31,lg:"Serie A",nat:"Spain"},
+  {n:"Mikel Oyarzabal",p:"FWD",r:82,a:27,lg:"La Liga",nat:"Spain"},
+  {n:"Mason Greenwood",p:"FWD",r:82,a:23,lg:"Ligue 1",nat:"England"},
+  {n:"Sadio Mané",p:"FWD",r:82,a:32,lg:"Saudi Pro League",nat:"Senegal"},
+  {n:"Désiré Doué",p:"FWD",r:82,a:20,lg:"Ligue 1",nat:"France"},
+  {n:"Jonathan David",p:"FWD",r:82,a:25,lg:"Serie A",nat:"Canada"},
+  {n:"Riyad Mahrez",p:"FWD",r:81,a:33,lg:"Saudi Pro League",nat:"Algeria"},
+  {n:"Nicolas Jackson",p:"FWD",r:80,a:23,lg:"Premier League",nat:"Senegal"},
+  {n:"Joshua Zirkzee",p:"FWD",r:80,a:23,lg:"Premier League",nat:"Netherlands"},
+  {n:"Rasmus Højlund",p:"FWD",r:80,a:21,lg:"Premier League",nat:"Denmark"},
+  {n:"Deniz Undav",p:"FWD",r:80,a:28,lg:"Bundesliga",nat:"Germany"},
+  {n:"Take Kubo",p:"FWD",r:80,a:23,lg:"La Liga",nat:"Japan"},
+  {n:"Karim Adeyemi",p:"FWD",r:80,a:22,lg:"Bundesliga",nat:"Germany"},
+  {n:"Callum Wilson",p:"FWD",r:79,a:32,lg:"Premier League",nat:"England"},
+  {n:"Luis Suárez",p:"FWD",r:79,a:37,lg:"MLS",nat:"Uruguay"},
+  {n:"Evan Ferguson",p:"FWD",r:78,a:19,lg:"Premier League",nat:"Ireland"},
+  {n:"Jamie Vardy",p:"FWD",r:78,a:37,lg:"Premier League",nat:"England"},
+  {n:"Dominic Calvert-Lewin",p:"FWD",r:78,a:27,lg:"Premier League",nat:"England"},
+  {n:"Brennan Johnson",p:"FWD",r:78,a:23,lg:"Premier League",nat:"Wales"},
+  {n:"Eddie Nketiah",p:"FWD",r:77,a:25,lg:"Premier League",nat:"England"},
+  {n:"Anthony Elanga",p:"FWD",r:77,a:22,lg:"Premier League",nat:"Sweden"},
+  {n:"Chris Wood",p:"FWD",r:77,a:32,lg:"Premier League",nat:"New Zealand"},
+  {n:"Danny Ings",p:"FWD",r:75,a:31,lg:"Premier League",nat:"England"},
 ];
 function tierForRating(r){ return r>=85?0 : r>=80?1 : r>=74?2 : r>=68?3 : r>=62?4 : 5; }
 const LEAGUE_SHORT={"Premier League":"PL","Championship":"Champ","League One":"Lge 1","League Two":"Lge 2","National League":"Nat Lg","National League North":"NL N","La Liga":"La Liga","Bundesliga":"Bundes.","Serie A":"Serie A","Ligue 1":"Ligue 1","Primeira Liga":"Primeira","Eredivisie":"Erediv.","Saudi Pro League":"Saudi","MLS":"MLS"};
 function leagueShort(lg){ return LEAGUE_SHORT[lg]||lg; }
+const FLAGS={"England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Wales":"🏴󠁧󠁢󠁷󠁬󠁳󠁿","Ireland":"🇮🇪","Spain":"🇪🇸","France":"🇫🇷","Germany":"🇩🇪","Italy":"🇮🇹","Portugal":"🇵🇹","Brazil":"🇧🇷","Argentina":"🇦🇷","Netherlands":"🇳🇱","Belgium":"🇧🇪","Norway":"🇳🇴","Sweden":"🇸🇪","Denmark":"🇩🇰","Croatia":"🇭🇷","Slovenia":"🇸🇮","Poland":"🇵🇱","Switzerland":"🇨🇭","Austria":"🇦🇹","Hungary":"🇭🇺","Serbia":"🇷🇸","Turkey":"🇹🇷","Georgia":"🇬🇪","Egypt":"🇪🇬","Nigeria":"🇳🇬","Ghana":"🇬🇭","Senegal":"🇸🇳","Morocco":"🇲🇦","Algeria":"🇩🇿","Cameroon":"🇨🇲","Guinea":"🇬🇳","USA":"🇺🇸","Canada":"🇨🇦","Uruguay":"🇺🇾","Ecuador":"🇪🇨","Japan":"🇯🇵","South Korea":"🇰🇷","New Zealand":"🇳🇿","Australia":"🇦🇺"};
+function flag(nat){ return nat? (FLAGS[nat]||"🏳️") : ""; }
+const GEN_NATS=["England","England","England","England","England","England","England","Scotland","Wales","Ireland","France","Spain","Netherlands","Nigeria","Ghana","Brazil","Portugal","Denmark","Sweden","USA","Australia"];
 
 // ---------- Utilities ----------
 const $ = (id)=>document.getElementById(id);
@@ -422,7 +425,7 @@ function freshPlayer(pos, baseStr){
     wage: 0, // set below
     goals:0, apps:0, injuredWeeks:0,
     form: rint(48,68), morale: rint(58,74), condition: 100,
-    contract: rint(1,4),
+    contract: rint(1,4), nat: pick(GEN_NATS),
   };
 }
 // effective match rating including form, morale and match fitness (condition)
@@ -437,6 +440,7 @@ function ensurePlayerAttrs(p){
   if(p.morale==null) p.morale=rint(58,74);
   if(p.condition==null) p.condition=100;
   if(p.contract==null) p.contract=rint(1,4);
+  if(p.nat==null) p.nat=pick(GEN_NATS);
   return p;
 }
 // per-tier economy anchor: weekly wage of a "rating 55" player at that tier
@@ -496,7 +500,7 @@ function makeSchedule(n){
 }
 
 // ---------- New game ----------
-function newGame(){
+function newGame(saveName){
   const divisions={};
   for(let t=0;t<TIERS.length;t++){
     divisions[t]=CLUBS[t].map(name=>makeClub(name,t,name===PLAYER_CLUB));
@@ -520,6 +524,7 @@ function newGame(){
     cup:null, live:null,
     stadium:6000, ticketPrice:18, sponsor:"stable",
     news:[], achievements:[],
+    slotId:"s"+Date.now(), slotName:(saveName&&saveName.trim())||"Macclesfield",
   };
   startSeasonFixtures();
   generateMarket();
@@ -1253,7 +1258,7 @@ function generateMarket(){
   // 1) real marquee players (expensive)
   REAL_PLAYERS.filter(rp=>!owned.has(rp.n)).forEach(rp=>{
     const p={ id:Math.random().toString(36).slice(2,9), name:rp.n, pos:rp.p, rating:rp.r, age:rp.a,
-              goals:0, apps:0, injuredWeeks:0, form:rint(52,72), morale:rint(60,76), condition:100, real:true, lg:rp.lg };
+              goals:0, apps:0, injuredWeeks:0, form:rint(52,72), morale:rint(60,76), condition:100, real:true, lg:rp.lg, nat:rp.nat };
     p.srcTier=tierForRating(rp.r); p.wage=wageOf(p,t); p.fee=feeForRating(p.rating,true);
     G.market.push(p);
   });
@@ -1304,11 +1309,35 @@ function sellPlayer(id){
 }
 
 // ---------- Save / load ----------
-const SAVE_KEY="macc_mgr_save_v1";
-function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(G)); }catch(e){} }
-function load(){ try{ const s=localStorage.getItem(SAVE_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
-function hasSave(){ return !!localStorage.getItem(SAVE_KEY); }
-function wipe(){ localStorage.removeItem(SAVE_KEY); }
+const SAVE_KEY="macc_mgr_save_v1";          // legacy single-save key (migrated to a slot)
+const INDEX_KEY="macc_mgr_slots", CUR_KEY="macc_mgr_current", SLOT_PREFIX="macc_mgr_slot_";
+function slotIndex(){ try{ return JSON.parse(localStorage.getItem(INDEX_KEY))||[]; }catch(e){ return []; } }
+function setSlotIndex(a){ try{ localStorage.setItem(INDEX_KEY, JSON.stringify(a)); }catch(e){} }
+function migrateLegacy(){
+  const legacy=localStorage.getItem(SAVE_KEY);
+  if(legacy && slotIndex().length===0){
+    try{ const g=JSON.parse(legacy); const id="s"+Date.now();
+      g.slotId=id; g.slotName=g.slotName||"Macclesfield";
+      localStorage.setItem(SLOT_PREFIX+id, JSON.stringify(g));
+      setSlotIndex([{id, name:g.slotName, season:g.season, tier:g.tier, updated:Date.now()}]);
+      localStorage.setItem(CUR_KEY, id); localStorage.removeItem(SAVE_KEY);
+    }catch(e){}
+  }
+}
+function save(){
+  if(!G) return;
+  if(!G.slotId) G.slotId="s"+Date.now();
+  try{
+    localStorage.setItem(SLOT_PREFIX+G.slotId, JSON.stringify(G));
+    localStorage.setItem(CUR_KEY, G.slotId);
+    const idx=slotIndex().filter(s=>s.id!==G.slotId);
+    idx.unshift({id:G.slotId, name:G.slotName||"Macclesfield", season:G.season, tier:G.tier, updated:Date.now()});
+    setSlotIndex(idx);
+  }catch(e){}
+}
+function loadSlot(id){ try{ const s=localStorage.getItem(SLOT_PREFIX+id); if(!s) return null; const g=JSON.parse(s); localStorage.setItem(CUR_KEY,id); return g; }catch(e){ return null; } }
+function deleteSlot(id){ localStorage.removeItem(SLOT_PREFIX+id); setSlotIndex(slotIndex().filter(s=>s.id!==id)); if(localStorage.getItem(CUR_KEY)===id) localStorage.removeItem(CUR_KEY); }
+function hasSave(){ return slotIndex().length>0; }
 function saveGame(){ if(!G) return; save(); toast("Progress saved ✔ — it'll be here when you return."); }
 function exportSave(){
   if(!G){ toast("Start a game first."); return; }
@@ -1324,7 +1353,7 @@ function importSave(){
     const r=new FileReader();
     r.onload=()=>{ try{ const data=JSON.parse(r.result);
         if(!data || !data.divisions || !data.squad){ toast("That doesn't look like a Macclesfield save."); return; }
-        G=data; ensureFinance(); save(); G.tab="home"; render(); toast("Save loaded — welcome back!");
+        G=data; ensureFinance(); G.slotId="s"+Date.now(); if(!G.slotName) G.slotName="Imported save"; save(); G.tab="home"; render(); toast("Save loaded — welcome back!");
       }catch(e){ toast("Couldn't read that save file."); } };
     r.readAsText(f); };
   inp.click();
@@ -1469,37 +1498,50 @@ function shareGame(){
   }
 }
 function renderTitle(){
-  const cont = hasSave();
+  migrateLegacy();
+  const slots=slotIndex().slice().sort((a,b)=>b.updated-a.updated);
+  const TN=["Premier League","Championship","League One","League Two","National League","NL North"];
+  const slotsHTML = slots.length? `
+    <div style="max-width:460px;margin:0 auto 18px;text-align:left">
+      <div class="muted small" style="margin-bottom:6px;text-align:center">Your saved games</div>
+      ${slots.map(s=>`<div class="panel" style="padding:10px 14px;margin-bottom:8px"><div class="flex-between">
+        <div><b>${s.name}</b><div class="muted small">Season ${s.season} · ${TN[s.tier]||"—"}</div></div>
+        <div style="display:flex;gap:6px"><button class="btn gold sm" onclick="loadGame('${s.id}')">Load</button>
+        <button class="btn alt sm" title="Delete save" onclick="confirmDeleteSlot('${s.id}','${(s.name||'').replace(/'/g,"")}')">🗑</button></div>
+      </div></div>`).join("")}
+    </div>` : "";
   $("app").innerHTML=`
   <div class="title-screen">
     <div class="badge-big">M</div>
     <h1>Macclesfield Manager</h1>
     <div class="sub" style="font-size:15px;margin-bottom:24px">Road to the Premier League</div>
-    <p class="muted" style="max-width:480px;margin:0 auto 26px">
+    ${slots.length? "" : `<p class="muted" style="max-width:480px;margin:0 auto 26px">
       Take charge of <b>Macclesfield</b> in the <b>National League North</b> — the sixth tier of English football —
-      and drag them up the pyramid to the promised land. Manage tactics, transfers and the bank balance.
-      Six divisions, real clubs, real promotion &amp; play-off rules.
-    </p>
+      and drag them up the pyramid to the promised land. Six divisions, real clubs, real promotion &amp; play-off rules.
+    </p>`}
+    ${slotsHTML}
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      ${cont?`<button class="btn gold" id="t-continue">Continue Save</button>`:""}
-      <button class="btn ${cont?'alt':''}" id="t-new">New Game</button>
+      <button class="btn gold" id="t-new">+ New Game</button>
       <button class="btn alt" id="t-help">📖 How to Play</button>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px">
       <button class="btn alt sm" id="t-import">📂 Import Save</button>
       <button class="btn alt sm" id="t-share">🔗 Share</button>
     </div>
-    <div class="muted small" style="margin-top:14px">Your game saves automatically in this browser.</div>
+    <div class="muted small" style="margin-top:14px">Games save automatically. You can keep multiple separate saves.</div>
   </div>`;
-  if(cont) $("t-continue").onclick=()=>{ G=load(); render(); };
   $("t-share").onclick=shareGame;
   $("t-help").onclick=showHelp;
   $("t-import").onclick=importSave;
   $("t-new").onclick=()=>{
-    if(cont && !confirm("Start a new game? This overwrites your current save.")) return;
-    newGame(); render(); showHelp(); // first-time tutorial
+    const name=(typeof prompt==="function"? prompt("Name this save (e.g. your manager name):","Macclesfield") : "Macclesfield");
+    if(name===null) return; // cancelled
+    newGame(name); render(); showHelp(); // first-time tutorial
   };
 }
+function loadGame(id){ const g=loadSlot(id); if(g){ G=g; ensureFinance(); render(); } else toast("Couldn't load that save."); }
+function confirmDeleteSlot(id,name){ if(typeof confirm==="function" && !confirm("Delete save \""+name+"\"? This can't be undone.")) return; deleteSlot(id); renderTitle(); }
+window.loadGame=loadGame; window.confirmDeleteSlot=confirmDeleteSlot;
 
 function headerHTML(){
   const pc=playerClub();
@@ -1661,7 +1703,7 @@ function squadTab(){
   const xiRows=slots.map((pos,i)=>{
     const cur=G.squad.find(p=>p.id===G.lineup[i]);
     const cands=G.squad.filter(p=>p.pos===pos && p.injuredWeeks<=0).sort((a,b)=>b.rating-a.rating);
-    const opts=cands.map(p=>`<option value="${p.id}" ${cur&&p.id===cur.id?'selected':''}>${p.name} (${p.rating})</option>`).join("");
+    const opts=cands.map(p=>`<option value="${p.id}" ${cur&&p.id===cur.id?'selected':''}>${flag(p.nat)} ${p.name} (${p.rating})</option>`).join("");
     const isCap=cur&&cur.id===G.captainId, isPk=cur&&cur.id===G.penTakerId;
     const roleBtns=cur? `<button class="btn sm ${isCap?'':'alt'}" title="Captain" onclick="setCaptain('${cur.id}')">C</button> <button class="btn sm ${isPk?'gold':'alt'}" title="Penalty taker" onclick="setPenTaker('${cur.id}')">P</button>` : '';
     return `<tr>
@@ -1686,7 +1728,7 @@ function squadTab(){
       : `${opts.canStart?`<button class="btn sm" onclick="startFromBench('${p.id}')">Start</button> `:''}${(p.contract||9)<=2?`<button class="btn gold sm" onclick="renewContract('${p.id}')">Renew</button> `:''}<button class="btn alt sm" onclick="sellPlayer('${p.id}')">Sell</button>`;
     return `<tr>
     <td><span class="pill pos-${p.pos}">${p.pos}</span></td>
-    <td>${p.name}${p.loan?' <span class="pill" style="background:var(--blue);color:#fff">LOAN</span>':''}${p.injuredWeeks>0?` <span class="injured">🚑 ${p.injuredWeeks}w</span>`:''}</td>
+    <td title="${p.nat||''}">${flag(p.nat)} ${p.name}${p.loan?' <span class="pill" style="background:var(--blue);color:#fff">LOAN</span>':''}${p.injuredWeeks>0?` <span class="injured">🚑 ${p.injuredWeeks}w</span>`:''}</td>
     <td class="num"><b>${p.rating}</b></td>
     <td class="num">${formCell(p)}</td>
     <td class="num">${condCell(p)}</td>
@@ -1770,7 +1812,8 @@ function marketRows(){
   if(q){
     list=list.filter(p=> p.name.toLowerCase().includes(q)
       || p.pos.toLowerCase()===q
-      || (p.lg && p.lg.toLowerCase().includes(q)) );
+      || (p.lg && p.lg.toLowerCase().includes(q))
+      || (p.nat && p.nat.toLowerCase().includes(q)) );
   }
   const total=list.length, CAP=120;
   const rows=list.slice(0,CAP).map(p=>{
@@ -1781,7 +1824,7 @@ function marketRows(){
     const lvl = p.lg? leagueShort(p.lg) : (p.srcTier!==undefined? TIERS[p.srcTier].short : "—");
     return `<tr>
       <td><span class="pill pos-${p.pos}">${p.pos}</span></td>
-      <td>${p.name}</td>
+      <td title="${p.nat||''}">${flag(p.nat)} ${p.name}</td>
       <td class="num muted">${lvl}</td>
       <td class="num"><b>${p.rating}</b></td>
       <td class="num">${p.age}</td>
@@ -1794,7 +1837,7 @@ function marketRows(){
     </tr>`;
   }).join("");
   const note = total>CAP
-    ? `<div class="muted small" style="margin-top:8px">Showing the top ${CAP} of ${total} matching players — type a name, position (GK/DEF/MID/FWD) or league to narrow it down.</div>`
+    ? `<div class="muted small" style="margin-top:8px">Showing the top ${CAP} of ${total} matching players — type a name, position, league or nationality to narrow it down.</div>`
     : `<div class="muted small" style="margin-top:8px">${total} player${total===1?'':'s'} ${q?'match your search':'available'}.</div>`;
   return `<table><thead><tr><th title="Position">Pos</th><th>Name</th><th class="num" title="The player's current league">From</th><th class="num" title="Overall rating (1–99)">OVR</th><th class="num">Age</th><th class="num" title="Weekly wage — counts against your wage budget">Wage</th><th class="num" title="Transfer fee to sign permanently">Fee</th><th></th></tr></thead><tbody>${rows}</tbody></table>${note}`;
 }
@@ -1809,7 +1852,7 @@ function transfersTab(){
         <span class="stat" style="display:inline-block"><span class="k">Wage room</span><div class="v ${wageRoom<0?'bad':''}">${money(wageRoom)}/w</div></span>
       </div>
     </div>
-    <p class="muted small">Search ${G.market.length} players from across all six divisions — including the Premier League. Search by name, position (GK/DEF/MID/FWD) or league (e.g. "Championship"). Sell from the Squad tab to raise funds.</p>
+    <p class="muted small">Search ${G.market.length} players from across all six divisions — including the Premier League. Search by name, position, league or nationality (e.g. "Brazil", "La Liga"). Sell from the Squad tab to raise funds.</p>
     <input id="mktsearch" placeholder="Search players, positions or leagues…" value="${sv}" autocomplete="off" style="width:100%;margin-bottom:10px" />
     <div id="mktlist">${marketRows()}</div>
   </div>`;
@@ -2129,7 +2172,7 @@ function showSackedScreen(s){
     <p class="muted">The dream ends here, after ${s.season} season${s.season>1?'s':''} in charge.</p>
     <div style="margin-top:14px"><button class="btn" id="sack-restart">Start Again</button></div>
   </div></div>`;
-  $("sack-restart").onclick=()=>{ wipe(); root.innerHTML=""; G=null; renderTitle(); };
+  $("sack-restart").onclick=()=>{ if(G&&G.slotId) deleteSlot(G.slotId); root.innerHTML=""; G=null; renderTitle(); };
 }
 
 // Override startNextSeason since review now uses prepNextSeasonShell + Home kickoff.
