@@ -714,7 +714,7 @@ function setupLive(ctx){
   const bench=G.squad.filter(p=>!G.lineup.includes(p.id) && p.injuredWeeks<=0)
     .sort((a,b)=>b.rating-a.rating).map(p=>p.id);
   G.live=Object.assign({
-    mentality:G.mentality, minute:0, my:0, opp:0, events:[], momentum:0,
+    mentality:G.mentality, minute:0, my:0, opp:0, events:[], momentum:0, shotsMy:0, shotsOpp:0,
     onPitch:xi.map(p=>p.id), bench, appeared:xi.map(p=>p.id), subsMade:0,
     finished:false, active:true, pens:null,
   }, ctx);
@@ -778,13 +778,13 @@ function stepLive(target){
     let [pMy,pOp]=liveLambdas();
     const mo=clamp(L.momentum/300,-0.22,0.22);
     pMy=pMy/90*(1+mo); pOp=pOp/90*(1-mo);
-    if(Math.random()<pMy){ L.my++; L.momentum=Math.min(100,L.momentum+40);
+    if(Math.random()<pMy){ L.my++; L.shotsMy++; L.momentum=Math.min(100,L.momentum+40);
       L.events.push({m:L.minute,t:`⚽ ${liveScorer()} ${L.minute}'`,me:true}); }
-    else if(Math.random()<pMy*3.2){ const p=myFieldPlayer(); if(p){ L.momentum=Math.min(100,L.momentum+8);
+    else if(Math.random()<pMy*3.2){ const p=myFieldPlayer(); if(p){ L.shotsMy++; L.momentum=Math.min(100,L.momentum+8);
       L.events.push({m:L.minute,t:`${L.minute}' ${p.name} ${pick(CHANCE_MY)}`,me:true,chance:true}); } }
-    if(Math.random()<pOp){ L.opp++; L.momentum=Math.max(-100,L.momentum-40);
+    if(Math.random()<pOp){ L.opp++; L.shotsOpp++; L.momentum=Math.max(-100,L.momentum-40);
       L.events.push({m:L.minute,t:`⚽ ${L.oppName} ${L.minute}'`,me:false}); }
-    else if(Math.random()<pOp*3.2){ L.momentum=Math.max(-100,L.momentum-8);
+    else if(Math.random()<pOp*3.2){ L.shotsOpp++; L.momentum=Math.max(-100,L.momentum-8);
       L.events.push({m:L.minute,t:`${L.minute}' ${L.oppName} ${pick(CHANCE_OPP)}`,me:false,chance:true}); }
     if(Math.random()<0.006){ const p=myFieldPlayer(); if(p) L.events.push({m:L.minute,t:`📒 ${L.minute}' Booking for ${p.name}`,me:true,chance:true}); }
     if(Math.random()<0.0013) liveInjury(L.minute);
@@ -1309,6 +1309,26 @@ function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(G)); }catch(
 function load(){ try{ const s=localStorage.getItem(SAVE_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
 function hasSave(){ return !!localStorage.getItem(SAVE_KEY); }
 function wipe(){ localStorage.removeItem(SAVE_KEY); }
+function saveGame(){ if(!G) return; save(); toast("Progress saved ✔ — it'll be here when you return."); }
+function exportSave(){
+  if(!G){ toast("Start a game first."); return; }
+  const blob=new Blob([JSON.stringify(G)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`macclesfield-save-S${G.season}.json`; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 200);
+  toast("Save file downloaded.");
+}
+function importSave(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept=".json,application/json";
+  inp.onchange=()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const data=JSON.parse(r.result);
+        if(!data || !data.divisions || !data.squad){ toast("That doesn't look like a Macclesfield save."); return; }
+        G=data; ensureFinance(); save(); G.tab="home"; render(); toast("Save loaded — welcome back!");
+      }catch(e){ toast("Couldn't read that save file."); } };
+    r.readAsText(f); };
+  inp.click();
+}
 
 // ---------- Toast ----------
 function toast(msg){
@@ -1377,8 +1397,16 @@ function renderLive(){
       <div class="muted small">${L.minute}'</div>
       <div style="font-size:22px;font-weight:800;margin:6px 0">${homeName} <span style="color:var(--gold)">${homeG} – ${awayG}</span> ${awayName}</div>
       <div class="muted small">${L.meHome?"Home":"Away"} · ${L.mentality} · vs strength ${Math.round(L.oppStr)}</div>
-      <div class="bar" style="max-width:320px;margin:8px auto 0"><span style="width:${Math.round(L.minute/90*100)}%"></span></div>
-      <div class="muted small" style="margin-top:8px">Possession ${livePossession()}% · ${L.momentum>15?"You're on top 🔼":L.momentum<-15?"Under pressure 🔽":"End to end"}</div>
+      <div class="bar" style="max-width:320px;margin:8px auto 0" title="Match clock"><span style="width:${Math.round(L.minute/90*100)}%"></span></div>
+      ${(()=>{ const myP=livePossession(), homeP=L.meHome?myP:100-myP; const hS=L.meHome?L.shotsMy:L.shotsOpp, aS=L.meHome?L.shotsOpp:L.shotsMy; return `
+      <div style="display:flex;align-items:center;gap:8px;max-width:360px;margin:12px auto 4px;font-size:12px" title="Share of possession">
+        <span style="width:34px;text-align:right">${homeP}%</span>
+        <div style="flex:1;height:11px;border-radius:6px;overflow:hidden;display:flex;background:var(--panel2)">
+          <span style="width:${homeP}%;background:var(--accent)"></span><span style="width:${100-homeP}%;background:#6b7785"></span>
+        </div>
+        <span style="width:34px">${100-homeP}%</span>
+      </div>
+      <div class="muted small">Possession · Shots ${hS}–${aS} · ${L.momentum>15?"You're on top 🔼":L.momentum<-15?"Under pressure 🔽":"End to end"}</div>`; })()}
     </div>
     <div class="row">
       <div class="col"><div class="panel"><h2>Match feed</h2><div class="events" style="max-height:280px;overflow:auto">${feed}</div></div></div>
@@ -1403,6 +1431,26 @@ function showMatchResult(L, kind, cupMsg){
     <div class="center"><button class="btn" id="mr-ok">Continue</button></div>
   </div></div>`;
   $("mr-ok").onclick=()=>{ root.innerHTML=""; G.tab="home"; render(); };
+}
+
+function showHelp(){
+  const root=$("modal-root");
+  root.innerHTML=`<div class="overlay"><div class="modal">
+    <h2>📖 Manager's handbook</h2>
+    <p class="muted small">Welcome to Macclesfield — sixth tier of English football. Your job: climb all the way to the Premier League.</p>
+    <h3>⚽ Matches & tactics</h3>
+    <p class="small">Each week you play your fixture live. In the <b>dugout</b> you set <b>formation</b> and <b>mentality</b> (Attacking/Balanced/Defensive) and make <b>substitutions</b>. Read the <b>scouting report</b> first — picking the right approach for the match-up gives a real edge; going gung-ho as a big underdog backfires.</p>
+    <h3>👥 Squad, form & fitness</h3>
+    <p class="small"><b>OVR</b> is overall rating. <b>Form</b> rises with wins; <b>Fit</b> (match fitness) drains when a player features and recovers when rested — so <b>rotate</b> tired players or they'll underperform. Pick your XI, bench and reserves on the Squad tab, and name a captain (small boost) and penalty taker.</p>
+    <h3>💰 Transfers & money</h3>
+    <p class="small">Your transfer budget is the club's <b>actual bank balance</b> — you can't buy stars on day one, you have to build the club up. <b>Loan</b> players in cheaply for a season, and watch <b>contracts</b>: let one expire and the player leaves for free, so <b>renew</b> in time. Make money via the <b>Finances</b> tab: win matches and cups for prize money, expand the stadium, set the right ticket price, and pick a sponsor deal.</p>
+    <h3>🏆 The journey</h3>
+    <p class="small">Finish high enough to win <b>promotion</b> (top spots auto-promote; the play-offs decide one more). Meet the <b>board's expectation</b> or risk the sack. There's also the <b>FA Cup</b> for glory and cash. Track your <b>honours, news and achievements</b> on the History tab.</p>
+    <h3>💾 Saving</h3>
+    <p class="small">Your game <b>saves automatically</b> in this browser — use <b>Continue</b> next time. Use <b>Export</b> to download a save file (and <b>Import</b> to resume it on another device or browser).</p>
+    <div class="center" style="margin-top:14px"><button class="btn gold" id="help-ok">Let's go ⚽</button></div>
+  </div></div>`;
+  $("help-ok").onclick=()=>{ $("modal-root").innerHTML=""; };
 }
 
 function shareGame(){
@@ -1435,14 +1483,21 @@ function renderTitle(){
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       ${cont?`<button class="btn gold" id="t-continue">Continue Save</button>`:""}
       <button class="btn ${cont?'alt':''}" id="t-new">New Game</button>
-      <button class="btn alt" id="t-share">🔗 Share</button>
+      <button class="btn alt" id="t-help">📖 How to Play</button>
     </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+      <button class="btn alt sm" id="t-import">📂 Import Save</button>
+      <button class="btn alt sm" id="t-share">🔗 Share</button>
+    </div>
+    <div class="muted small" style="margin-top:14px">Your game saves automatically in this browser.</div>
   </div>`;
   if(cont) $("t-continue").onclick=()=>{ G=load(); render(); };
   $("t-share").onclick=shareGame;
+  $("t-help").onclick=showHelp;
+  $("t-import").onclick=importSave;
   $("t-new").onclick=()=>{
     if(cont && !confirm("Start a new game? This overwrites your current save.")) return;
-    newGame(); render();
+    newGame(); render(); showHelp(); // first-time tutorial
   };
 }
 
@@ -1463,7 +1518,12 @@ function headerHTML(){
     <div class="stat"><div class="k">Played</div><div class="v">${G.table[pc.name].P} / ${G.schedule.length}</div></div>
     <div class="stat"><div class="k">Bank</div><div class="v">${money(G.bank)}</div></div>
     <div class="stat"><div class="k">Transfer kitty</div><div class="v">${money(G.transferBudget)}</div></div>
-    <button class="btn alt sm" style="align-self:center" onclick="shareGame()">🔗 Share</button>
+    <div style="align-self:center;display:flex;gap:6px">
+      <button class="btn alt sm" title="Save progress" onclick="saveGame()">💾</button>
+      <button class="btn alt sm" title="How to play" onclick="showHelp()">📖</button>
+      <button class="btn alt sm" title="Download a save file" onclick="exportSave()">⤓</button>
+      <button class="btn alt sm" title="Share" onclick="shareGame()">🔗</button>
+    </div>
   </header>
   </div>`;
 }
@@ -1642,7 +1702,7 @@ function squadTab(){
     : `<tr><td colspan="9" class="muted center">No injuries — everyone's fit. 💪</td></tr>`;
 
   const xiRating=squadStrength(G.formation,G.mentality).toFixed(1);
-  const subHead=`<thead><tr><th>Pos</th><th>Name</th><th class="num">OVR</th><th class="num">Form</th><th class="num">Fit</th><th class="num">Age</th><th class="num">Deal</th><th class="num">Value</th><th></th></tr></thead>`;
+  const subHead=`<thead><tr><th title="Position">Pos</th><th>Name</th><th class="num" title="Overall rating (1–99)">OVR</th><th class="num" title="Recent form">Form</th><th class="num" title="Match fitness — rest tired players to keep them sharp">Fit</th><th class="num">Age</th><th class="num" title="Contract years remaining — renew before it runs out or the player leaves on a free">Deal</th><th class="num" title="Estimated fee you'd receive if you sold him">Value</th><th></th></tr></thead>`;
 
   const expiring=G.squad.filter(p=>!p.loan && (p.contract||9)<=1);
   const expiringPanel = expiring.length? `<div class="panel" style="border-color:var(--gold)">
@@ -1659,7 +1719,7 @@ function squadTab(){
       <button class="btn alt sm" onclick="autoPickXI()">Auto-pick best XI</button>
     </div>
     <p class="muted small">Pick who fills each slot. <b>Form</b> and <b>Fit</b> (match fitness) affect performance — rest tired players to keep them sharp. Change formation on the Tactics tab.</p>
-    <table><thead><tr><th>Pos</th><th>Player</th><th class="num">OVR</th><th class="num">Form</th><th class="num">Fit</th><th class="num">Cap / Pen</th></tr></thead>
+    <table><thead><tr><th title="Position">Pos</th><th>Player</th><th class="num" title="Overall rating (1–99)">OVR</th><th class="num" title="Recent form — rises with wins, dips with losses and time on the bench">Form</th><th class="num" title="Match fitness — drops when a player features, recovers when rested. Tired players underperform.">Fit</th><th class="num" title="Set the team captain (C) and penalty taker (P)">Cap / Pen</th></tr></thead>
     <tbody>${xiRows}</tbody></table>
   </div>
 
@@ -1736,7 +1796,7 @@ function marketRows(){
   const note = total>CAP
     ? `<div class="muted small" style="margin-top:8px">Showing the top ${CAP} of ${total} matching players — type a name, position (GK/DEF/MID/FWD) or league to narrow it down.</div>`
     : `<div class="muted small" style="margin-top:8px">${total} player${total===1?'':'s'} ${q?'match your search':'available'}.</div>`;
-  return `<table><thead><tr><th>Pos</th><th>Name</th><th class="num">From</th><th class="num">OVR</th><th class="num">Age</th><th class="num">Wage</th><th class="num">Fee</th><th></th></tr></thead><tbody>${rows}</tbody></table>${note}`;
+  return `<table><thead><tr><th title="Position">Pos</th><th>Name</th><th class="num" title="The player's current league">From</th><th class="num" title="Overall rating (1–99)">OVR</th><th class="num">Age</th><th class="num" title="Weekly wage — counts against your wage budget">Wage</th><th class="num" title="Transfer fee to sign permanently">Fee</th><th></th></tr></thead><tbody>${rows}</tbody></table>${note}`;
 }
 function transfersTab(){
   const wageRoom=G.wageBudget-totalWeeklyWages();
@@ -1900,7 +1960,7 @@ function tableTab(){
     : `<span class="pill" style="background:var(--accent)">Auto promotion</span> <span class="pill" style="background:var(--blue)">Play-offs</span> <span class="pill" style="background:var(--red)">Relegation</span>`;
   return `<div class="panel">
     <div class="flex-between"><h2>${TIERS[G.tier].name}</h2><div>${legend}</div></div>
-    <table><thead><tr><th class="num">#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GF</th><th class="num">GA</th><th class="num">GD</th><th class="num">Pts</th><th>Form</th></tr></thead>
+    <table><thead><tr><th class="num" title="Position">#</th><th>Club</th><th class="num" title="Played">P</th><th class="num" title="Won">W</th><th class="num" title="Drawn">D</th><th class="num" title="Lost">L</th><th class="num" title="Goals for">GF</th><th class="num" title="Goals against">GA</th><th class="num" title="Goal difference">GD</th><th class="num" title="Points (3 per win, 1 per draw)">Pts</th><th title="Last 5 results">Form</th></tr></thead>
     <tbody>${rows}</tbody></table>
   </div>`;
 }
@@ -2084,6 +2144,7 @@ function startNextSeason(){
 window.buyPlayer=buyPlayer; window.sellPlayer=sellPlayer;
 window.setLineupSlot=setLineupSlot; window.startFromBench=startFromBench; window.autoPickXI=autoPickXI;
 window.setCaptain=setCaptain; window.setPenTaker=setPenTaker; window.shareGame=shareGame;
+window.saveGame=saveGame; window.exportSave=exportSave; window.importSave=importSave; window.showHelp=showHelp;
 window.expandStadium=expandStadium; window.setTicketPrice=setTicketPrice; window.setSponsor=setSponsor;
 window.loanPlayer=loanPlayer; window.renewContract=renewContract;
 function gotoTab(t){ G.tab=t; render(); } window.gotoTab=gotoTab;
